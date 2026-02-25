@@ -1,0 +1,282 @@
+version: '3.9'
+
+services:
+  pulsar:
+    image: apachepulsar/pulsar:4.0.5
+    container_name: pulsar
+    command: >
+      /bin/bash -c "bin/apply-config-from-env.py conf/standalone.conf && bin/pulsar standalone"
+    restart: always
+    environment:
+      PULSAR_STANDALONE_USE_ZOOKEEPER: 1
+    volumes:
+      - ./data/pulsar/data:/pulsar/data
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+    networks:
+      - pulsar-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  redis:
+    image: redis/redis-stack:7.2.0-v18
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+      - "16379:16379"
+    networks:
+      - redis-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: minio
+    restart: always
+    command: server --address ":9099" --console-address ":9000" /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    volumes:
+      - ./data/minio/data:/data
+    ports:
+      - "9000:9000"
+      - "9099:9099"
+    networks:
+      - minio-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    container_name: keycloak
+    command:
+      - start-dev
+    restart: always
+    depends_on:
+      - keycloak-postgres
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8090:8080"
+    networks:
+      - keycloak-network
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  keycloak-postgres:
+    image: postgres:15
+    container_name: keycloak-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/keycloak-postgres/data:/var/lib/postgresql/data
+    ports:
+      - "20001:5432"
+    networks:
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.123.21
+    container_name: n8n
+    restart: always
+    depends_on:
+      - n8n-postgres
+    environment:
+      GENERIC_TIMEZONE: Asia/Yekaterinburg
+      TZ: Asia/Yekaterinburg
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_RUNNERS_ENABLED: "true"
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_HOST: n8n-postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: postgres
+      DB_POSTGRESDB_SCHEMA: public
+      DB_POSTGRESDB_PASSWORD: postgres
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - n8n-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  n8n-postgres:
+    image: postgres:15
+    container_name: n8n-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/n8n-postgres/data:/var/lib/postgresql/data
+    ports:
+      - "20002:5432"
+    networks:
+      - n8n-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  seq:
+    image: datalust/seq:2025.2.14258
+    container_name: seq
+    restart: always
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_PASSWORD: admin
+    volumes:
+      - ./data/seq/data:/data
+    ports:
+      - "5341:5341"
+      - "8900:80"
+    networks:
+      - seq-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  jaeger:
+    image: jaegertracing/all-in-one:1.71.0
+    container_name: jaeger
+    restart: always
+    environment:
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    volumes:
+      - ./data/jaeger:/badger
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "14269:14269"
+      - "16686:16686"
+    networks:
+      - jaeger-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: node-exporter
+    restart: always
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    expose:
+      - "9100"
+    networks:
+      - node-exporter-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./data/prometheus:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    expose:
+      - "9090"
+    networks:
+      - prometheus-network
+      - pulsar-network
+      - redis-network
+      - minio-network
+      - jaeger-network
+      - node-exporter-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  grafana:
+    image: grafana/grafana:12.2.0-16711121739
+    container_name: grafana
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_ROOT_URL: http://localhost:3000
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./data/grafana/data:/var/lib/grafana
+      - ./data/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    networks:
+      - prometheus-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  portainer:
+    image: portainer/portainer-ce:2.38.1
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/portainer/data:/data
+    ports:
+      - "9443:9443"
+      - "9442:9000"
+      - "8000:8000"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+networks:
+  pulsar-network:
+    driver: overlay
+  redis-network:
+    driver: overlay
+  minio-network:
+    driver: overlay
+  keycloak-network:
+    driver: overlay
+  keycloak-postgres-network:
+    driver: overlay
+  n8n-postgres-network:
+    driver: overlay
+  seq-network:
+    driver: overlay
+  jaeger-network:
+    driver: overlay
+  node-exporter-network:
+    driver: overlay
+  prometheus-network:
+    driver: overlay

@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/deploy/" />
+  <Folder Name="/deploy/docker/">
+    <File Path="deploy/docker/docker-compose-local.yaml" />
+    <File Path="deploy/docker/prometheus.yml" />
+  </Folder>
+  <Folder Name="/deploy/k8s/" />
+  <Folder Name="/docs/" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/" />
+  <Folder Name="/src/backend/BuildingBlocks/" />
+  <Folder Name="/src/backend/Services/" />
+  <Folder Name="/src/frontend/" />
+  <Folder Name="/tests/" />
+</Solution>
