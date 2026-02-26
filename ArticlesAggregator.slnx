@@ -8,7 +8,12 @@
   <Folder Name="/docs/" />
   <Folder Name="/src/" />
   <Folder Name="/src/backend/" />
-  <Folder Name="/src/backend/BuildingBlocks/" />
+  <Folder Name="/src/backend/BuildingBlocks/">
+    <Project Path="src/backend/BuildingBlocks/Extensions/Extensions.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Channel/Messaging.Channel.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Pulsar/Messaging.Pulsar.csproj" />
+  </Folder>
   <Folder Name="/src/backend/Services/" />
   <Folder Name="/src/frontend/" />
   <Folder Name="/tests/" />
