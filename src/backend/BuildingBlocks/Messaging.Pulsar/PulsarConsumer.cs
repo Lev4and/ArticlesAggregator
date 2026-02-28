@@ -1,4 +1,5 @@
-﻿using DotPulsar;
+﻿using System.Runtime.CompilerServices;
+using DotPulsar;
 using DotPulsar.Abstractions;
 using DotPulsar.Extensions;
 using Messaging.Abstracts;
@@ -19,7 +20,8 @@ public class PulsarConsumer : IMessageConsumer
         _consumer = consumerBuilder.Create();
     }
     
-    public async IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         while (!cancellationToken.IsCancellationRequested)
         {

@@ -13,16 +13,13 @@ namespace Messaging.Pulsar;
 
 public class PulsarProducer : IDistributedMessageProducer
 {
-    private readonly ILogger _logger;
     private readonly IPulsarClient _client;
     private readonly PulsarProducerDictionary _producerDictionary;
     
     public PulsarProducer(
-        ILogger<PulsarProducer> logger, 
         IPulsarClient client, 
         PulsarProducerDictionary producerDictionary)
     {
-        _logger = logger;
         _client = client;
         _producerDictionary = producerDictionary;
     }
@@ -36,8 +33,6 @@ public class PulsarProducer : IDistributedMessageProducer
         var messageTopicAttribute = message.GetType().GetCustomAttribute<MessageTopicAttribute>();
         if (messageTopicAttribute is null)
         {
-            _logger.LogWarning("Pulsar message attribute not found on type {MessageType}", message.GetType());
-            
             return;
         }
 
@@ -56,10 +51,6 @@ public class PulsarProducer : IDistributedMessageProducer
         
         messageBuilder.Property(PulsarMessagePropertyConstants.Type, messageType);
 
-        _logger.LogInformation("Publishing message Id: {MessageId} Body: {@MessageBody}", message.Id, message);
-
         await messageBuilder.Send(messageBody, cancellationToken);
-        
-        _logger.LogInformation("Published message Id: {MessageId} Body: {@MessageBody}", message.Id, message);
     }
 }

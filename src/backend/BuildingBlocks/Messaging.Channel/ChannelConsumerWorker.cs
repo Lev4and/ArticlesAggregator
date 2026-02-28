@@ -7,16 +7,14 @@ namespace Messaging.Channel;
 
 public abstract class ChannelConsumerWorker : BackgroundService
 {
-    private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
 
     protected abstract string Topic { get; }
 
     protected virtual int ConsumerCount => 1;
 
-    protected ChannelConsumerWorker(ILogger<ChannelConsumerWorker> logger, IServiceProvider serviceProvider)
+    protected ChannelConsumerWorker(IServiceProvider serviceProvider)
     {
-        _logger = logger;
         _serviceProvider = serviceProvider;
     }
 
@@ -40,15 +38,11 @@ public abstract class ChannelConsumerWorker : BackgroundService
                     
                     try
                     {
-                        _logger.LogInformation("Received message Id: {MessageId} Body: {@MessageBody}", message.Id, message);
-                        
                         var messageHandlerType = typeof(IMessageHandler<>).MakeGenericType(message.GetType());
                         
                         var messageHandler = scope.ServiceProvider.GetService(messageHandlerType);
                         if (messageHandler is null)
                         {
-                            _logger.LogWarning("Not found message handler for {MessageType}", message.GetType());
-                            
                             continue;
                         }
                         
@@ -57,21 +51,15 @@ public abstract class ChannelConsumerWorker : BackgroundService
                         if (messageHandleResult.IsSuccess)
                         {
                             await consumer.AcknowledgeAsync(messageConsumedContext, stoppingToken);
-
-                            _logger.LogInformation("Message processed Id: {MessageId} Body: {@MessageBody}", message.Id, message);
                         }
                         else
                         {
                             await consumer.NegativeAcknowledgeAsync(messageConsumedContext, stoppingToken);
                         }
                     }
-                    catch (Exception exception)
+                    catch
                     {
                         await consumer.NegativeAcknowledgeAsync(messageConsumedContext, stoppingToken);
-                        
-                        _logger.LogError(exception,
-                            "An error occurred while processing message Id: {MessageId} Body: {@MessageBody}",
-                                message.Id, message);
                     }
                 }
             })
