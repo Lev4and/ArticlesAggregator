@@ -2,7 +2,9 @@
 using DotPulsar;
 using DotPulsar.Abstractions;
 using DotPulsar.Extensions;
-using Messaging.Abstracts;
+using Messaging.Abstracts.Attributes;
+using Messaging.Abstracts.Distributed;
+using Messaging.Pulsar.Constants;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using IMessage = Messaging.Abstracts.IMessage;
@@ -28,29 +30,31 @@ public class PulsarProducer : IDistributedMessageProducer
     public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default) 
         where TMessage : IMessage
     {
-        var messageAttribute = message.GetType().GetCustomAttribute<PulsarMessageAttribute>();
-        if (messageAttribute is null)
+        var messageTypeAttribute = message.GetType().GetCustomAttribute<MessageTypeAttribute>();
+        var messageType = messageTypeAttribute?.Type ?? typeof(TMessage).Name;
+        
+        var messageTopicAttribute = message.GetType().GetCustomAttribute<MessageTopicAttribute>();
+        if (messageTopicAttribute is null)
         {
             _logger.LogWarning("Pulsar message attribute not found on type {MessageType}", message.GetType());
             
             return;
         }
 
-        if (!_producerDictionary.ContainsKey(messageAttribute.Topic))
+        if (!_producerDictionary.ContainsKey(messageTopicAttribute.Topic))
         {
-            var producerBuilder = _client.NewProducer(Schema.String).Topic(messageAttribute.Topic);
+            var producerBuilder = _client.NewProducer(Schema.String).Topic(messageTopicAttribute.Topic);
             
-            _producerDictionary.TryAdd(messageAttribute.Topic, producerBuilder.Create());
+            _producerDictionary.TryAdd(messageTopicAttribute.Topic, producerBuilder.Create());
         }
 
-        var producer = _producerDictionary[messageAttribute.Topic];
+        var producer = _producerDictionary[messageTopicAttribute.Topic];
         
-        var messageType = typeof(TMessage).Name;
         var messageBody = JsonConvert.SerializeObject(message);
 
         var messageBuilder = producer.NewMessage();
         
-        messageBuilder.Property("type", messageType);
+        messageBuilder.Property(PulsarMessagePropertyConstants.Type, messageType);
 
         _logger.LogInformation("Publishing message Id: {MessageId} Body: {@MessageBody}", message.Id, message);
 

@@ -5,10 +5,10 @@ namespace Messaging.Channel;
 
 public class ChannelQueue
 {
-    private readonly Channel<IMessage> _channel = System.Threading.Channels.Channel.CreateUnbounded<IMessage>();
+    private readonly Channel<IMessageContext> _channel = System.Threading.Channels.Channel.CreateUnbounded<IMessageContext>();
     
-    public ChannelWriter<IMessage> Writer => _channel.Writer;
+    public ChannelWriter<IMessageContext> Writer => _channel.Writer;
     
-    public ChannelReader<IMessage> Reader => _channel.Reader;
+    public ChannelReader<IMessageContext> Reader => _channel.Reader;
 
 }

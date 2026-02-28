@@ -1,13 +1,11 @@
 ﻿using System.Reflection;
 using DotPulsar;
-using DotPulsar.Abstractions;
-using DotPulsar.Extensions;
 using Extensions;
 using Messaging.Abstracts;
+using Messaging.Abstracts.Distributed;
 using Messaging.Pulsar.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using IMessage = Messaging.Abstracts.IMessage;
 
 namespace Messaging.Pulsar.Extensions;
 

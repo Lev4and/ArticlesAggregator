@@ -1,6 +1,6 @@
-﻿using System.Collections.Concurrent;
-using System.Reflection;
+﻿using System.Reflection;
 using Messaging.Abstracts;
+using Messaging.Abstracts.Attributes;
 using Microsoft.Extensions.Logging;
 
 namespace Messaging.Channel;
@@ -18,7 +18,7 @@ public class ChannelExchange
     
     public async Task PublishAsync(IMessage message, CancellationToken cancellationToken = default)
     {
-        var messageAttribute = message.GetType().GetCustomAttribute<ChannelMessageAttribute>();
+        var messageAttribute = message.GetType().GetCustomAttribute<MessageTopicAttribute>();
         if (messageAttribute is null)
         {
             _logger.LogWarning("Channel message attribute not found on type {MessageType}", message.GetType());
@@ -27,12 +27,14 @@ public class ChannelExchange
         }
         
         var queue = _queueDictionary.GetOrAdd(messageAttribute.Topic, new ChannelQueue());
-        
+
         _logger.LogInformation("Redirect message Id: {MessageId} Type: {MessageType} to queue", message.Id, 
             message.GetType());
-            
-        await queue.Writer.WriteAsync(message, cancellationToken);
-            
+        
+        var messageContext = new ChannelMessageContext(Guid.NewGuid().ToString(), message, DateTime.UtcNow);
+        
+        await queue.Writer.WriteAsync(messageContext, cancellationToken);
+
         _logger.LogInformation("Redirect message Id: {MessageId} Type: {MessageType} to queue completed", 
             message.Id, message.GetType());
     }

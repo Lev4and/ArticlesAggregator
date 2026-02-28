@@ -12,15 +12,28 @@ public class ChannelConsumer : IMessageConsumer
         _queue = queue;
     }
     
-    public async IAsyncEnumerable<IMessage> ReceiveAsync(
+    public async IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
             while (await _queue.Reader.WaitToReadAsync(cancellationToken))
             {
-                yield return await _queue.Reader.ReadAsync(cancellationToken);
+                var messageContext = await _queue.Reader.ReadAsync(cancellationToken);
+                
+                yield return new ChannelConsumeMessageContext(messageContext, DateTime.UtcNow);
             }
         }
+    }
+
+    public Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task NegativeAcknowledgeAsync(IConsumeMessageContext context, 
+        CancellationToken cancellationToken = default)
+    {
+        await _queue.Writer.WriteAsync(context, cancellationToken);
     }
 }

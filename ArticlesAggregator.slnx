@@ -10,9 +10,11 @@
   <Folder Name="/src/backend/" />
   <Folder Name="/src/backend/BuildingBlocks/">
     <Project Path="src/backend/BuildingBlocks/Extensions/Extensions.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts.Distributed/Messaging.Abstracts.Distributed.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Channel/Messaging.Channel.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Pulsar/Messaging.Pulsar.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Result/Result.csproj" />
   </Folder>
   <Folder Name="/src/backend/Services/" />
   <Folder Name="/src/frontend/" />

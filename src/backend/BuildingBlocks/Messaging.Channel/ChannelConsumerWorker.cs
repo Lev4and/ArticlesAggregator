@@ -34,8 +34,10 @@ public abstract class ChannelConsumerWorker : BackgroundService
             })
             .Select(async consumer =>
             {
-                await foreach (var message in consumer.ReceiveAsync(stoppingToken))
+                await foreach (var messageConsumedContext in consumer.ReceiveAsync(stoppingToken))
                 {
+                    var message = messageConsumedContext.Data;
+                    
                     try
                     {
                         _logger.LogInformation("Received message Id: {MessageId} Body: {@MessageBody}", message.Id, message);
@@ -50,12 +52,23 @@ public abstract class ChannelConsumerWorker : BackgroundService
                             continue;
                         }
                         
-                        await ((IMessageHandler)messageHandler).HandleAsync(message, stoppingToken);
+                        var messageHandleResult = await ((IMessageHandler)messageHandler)
+                            .HandleAsync(message, stoppingToken);
+                        if (messageHandleResult.IsSuccess)
+                        {
+                            await consumer.AcknowledgeAsync(messageConsumedContext, stoppingToken);
 
-                        _logger.LogInformation("Message processed Id: {MessageId} Body: {@MessageBody}", message.Id, message);
+                            _logger.LogInformation("Message processed Id: {MessageId} Body: {@MessageBody}", message.Id, message);
+                        }
+                        else
+                        {
+                            await consumer.NegativeAcknowledgeAsync(messageConsumedContext, stoppingToken);
+                        }
                     }
                     catch (Exception exception)
                     {
+                        await consumer.NegativeAcknowledgeAsync(messageConsumedContext, stoppingToken);
+                        
                         _logger.LogError(exception,
                             "An error occurred while processing message Id: {MessageId} Body: {@MessageBody}",
                                 message.Id, message);

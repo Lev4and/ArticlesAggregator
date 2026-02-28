@@ -2,5 +2,9 @@
 
 public interface IMessageConsumer
 {
-    IAsyncEnumerable<IMessage> ReceiveAsync(CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(CancellationToken cancellationToken = default);
+    
+    Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken cancellationToken = default);
+    
+    Task NegativeAcknowledgeAsync(IConsumeMessageContext context, CancellationToken cancellationToken = default);
 }
