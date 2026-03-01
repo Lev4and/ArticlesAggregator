@@ -84,7 +84,7 @@ services:
       replicas: 1
   
   keycloak-postgres:
-    image: postgres:15
+    image: postgres:18.3
     container_name: keycloak-postgres
     restart: always
     healthcheck:
@@ -132,7 +132,7 @@ services:
       replicas: 1
 
   n8n-postgres:
-    image: postgres:15
+    image: postgres:18.3
     container_name: n8n-postgres
     restart: always
     healthcheck:
@@ -151,33 +151,33 @@ services:
       mode: replicated
       replicas: 1
       
-  selenium-hub:
-    image: selenium/hub:4.41.0
-    container_name: selenium-hub
-    restart: always
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
-    networks:
-      - selenium-hub-network
-    deploy:
-      mode: replicated
-      replicas: 1
-  
-  selenium-node-chrome:
-    image: selenium/node-chrome:145.0-20260222
-    container_name: selenium-node-chrome
-    restart: always
-    environment:
-      SE_EVENT_BUS_HOST: selenium-hub
-      SE_EVENT_BUS_PUBLISH_PORT: 4442
-      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-    networks:
-      - selenium-hub-network
-    deploy:
-      mode: replicated
-      replicas: 1
+#  selenium-hub:
+#    image: selenium/hub:4.41.0
+#    container_name: selenium-hub
+#    restart: always
+#    ports:
+#      - "4442:4442"
+#      - "4443:4443"
+#      - "4444:4444"
+#    networks:
+#      - selenium-hub-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#  
+#  selenium-node-chrome:
+#    image: selenium/node-chrome:145.0-20260222
+#    container_name: selenium-node-chrome
+#    restart: always
+#    environment:
+#      SE_EVENT_BUS_HOST: selenium-hub
+#      SE_EVENT_BUS_PUBLISH_PORT: 4442
+#      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+#    networks:
+#      - selenium-hub-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
   
   opentelemetry-collector:
     image: otel/opentelemetry-collector:0.147.0-nightly.6d94db7
