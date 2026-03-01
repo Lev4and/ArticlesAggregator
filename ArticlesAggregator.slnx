@@ -2,7 +2,8 @@
   <Folder Name="/deploy/" />
   <Folder Name="/deploy/docker/">
     <File Path="deploy/docker/docker-compose-local.yaml" />
-    <File Path="deploy/docker/prometheus.yml" />
+    <File Path="deploy/docker/otel-collector-config.yaml" />
+    <File Path="deploy/docker/prometheus.yaml" />
   </Folder>
   <Folder Name="/deploy/k8s/" />
   <Folder Name="/docs/" />
@@ -18,15 +19,25 @@
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts.Distributed/Messaging.Abstracts.Distributed.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Channel/Messaging.Channel.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Messages/Messaging.Messages.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Pulsar/Messaging.Pulsar.csproj" />
     <Project Path="src/backend/BuildingBlocks/Missions.Abstracts/Missions.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/ObjectStorage.Abstracts/ObjectStorage.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Observability.Abstracts/Observability.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Observability.OpenTelemetry/Observability.OpenTelemetry.csproj" />
     <Project Path="src/backend/BuildingBlocks/Primitives/Primitives.csproj" />
     <Project Path="src/backend/BuildingBlocks/Result/Result.csproj" />
     <Project Path="src/backend/BuildingBlocks/Server.Kestrel/Server.Kestrel.csproj" />
   </Folder>
   <Folder Name="/src/backend/Services/" />
+  <Folder Name="/src/backend/Services/ProxyServerSearcher/">
+    <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Application/ProxyServerSearcher.Application.csproj" />
+    <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Domain/ProxyServerSearcher.Domain.csproj" />
+    <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Infrastructure/ProxyServerSearcher.Infrastructure.csproj" />
+    <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Persistence/ProxyServerSearcher.Persistence.csproj" />
+    <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Presentation/ProxyServerSearcher.Presentation.csproj" />
+    <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/ProxyServerSearcher.csproj" />
+  </Folder>
   <Folder Name="/src/frontend/" />
   <Folder Name="/tests/" />
 </Solution>

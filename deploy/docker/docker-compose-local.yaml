@@ -7,6 +7,8 @@ services:
     command: >
       /bin/bash -c "bin/apply-config-from-env.py conf/standalone.conf && bin/pulsar standalone"
     restart: always
+    healthcheck:
+      test: "bin/pulsar-admin brokers healthcheck"
     environment:
       PULSAR_STANDALONE_USE_ZOOKEEPER: 1
     volumes:
@@ -24,6 +26,8 @@ services:
     image: redis/redis-stack:7.2.0-v18
     container_name: redis
     restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
     ports:
       - "6379:6379"
       - "8001:8001"
@@ -83,6 +87,8 @@ services:
     image: postgres:15
     container_name: keycloak-postgres
     restart: always
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: postgres
@@ -129,6 +135,8 @@ services:
     image: postgres:15
     container_name: n8n-postgres
     restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
     environment:
       POSTGRES_DB: n8n
       POSTGRES_USER: postgres
@@ -142,6 +150,71 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      
+  selenium-hub:
+    image: selenium/hub:4.41.0
+    container_name: selenium-hub
+    restart: always
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    networks:
+      - selenium-hub-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  selenium-node-chrome:
+    image: selenium/node-chrome:145.0-20260222
+    container_name: selenium-node-chrome
+    restart: always
+    environment:
+      SE_EVENT_BUS_HOST: selenium-hub
+      SE_EVENT_BUS_PUBLISH_PORT: 4442
+      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+    networks:
+      - selenium-hub-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector:0.147.0-nightly.6d94db7
+    container_name: opentelemetry-collector
+    restart: always
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml
+    ports:
+      - "1888:1888"
+      - "8888:8888"
+      - "8889:8889"
+      - "13133:13133"
+      - "4317:4317"
+      - "4318:4318"
+      - "55679:55679"
+    networks:
+      - opentelemetry-collector-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+#  elasticsearch:
+#    image: elastic/elasticsearch:9.3.1
+#    container_name: elasticsearch
+#    restart: always
+#    volumes:
+#      - ./data/elasticsearch:/usr/share/elasticsearch/data
+#    ports:
+#      - "9200:9200"
+#    environment:
+#      discovery.type: single-node
+#      xpack.security.enabled: "false"
+#    networks:
+#      - elasticsearch-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
   
   seq:
     image: datalust/seq:2025.2.14258
@@ -173,8 +246,8 @@ services:
     volumes:
       - ./data/jaeger:/badger
     ports:
-      - "4317:4317"
-      - "4318:4318"
+      - "4319:4317"
+      - "4320:4318"
       - "14269:14269"
       - "16686:16686"
     networks:
@@ -210,7 +283,7 @@ services:
     restart: always
     volumes:
       - ./data/prometheus:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     expose:
       - "9090"
     networks:
@@ -271,6 +344,12 @@ networks:
   keycloak-postgres-network:
     driver: overlay
   n8n-postgres-network:
+    driver: overlay
+  selenium-hub-network:
+    driver: overlay
+  opentelemetry-collector-network:
+    driver: overlay
+  elasticsearch-network:
     driver: overlay
   seq-network:
     driver: overlay

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Server.Kestrel\Server.Kestrel.csproj" />
+      <ProjectReference Include="..\ProxyServerSearcher.Application\ProxyServerSearcher.Application.csproj" />
+      <ProjectReference Include="..\ProxyServerSearcher.Domain\ProxyServerSearcher.Domain.csproj" />
+      <ProjectReference Include="..\ProxyServerSearcher.Infrastructure\ProxyServerSearcher.Infrastructure.csproj" />
+      <ProjectReference Include="..\ProxyServerSearcher.Persistence\ProxyServerSearcher.Persistence.csproj" />
+      <ProjectReference Include="..\ProxyServerSearcher.Presentation\ProxyServerSearcher.Presentation.csproj" />
+    </ItemGroup>
+
+</Project>
