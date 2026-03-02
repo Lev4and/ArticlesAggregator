@@ -10,7 +10,8 @@ builder.AddObservabilityOpenTelemetry("proxy-server-searcher");
 
 builder.Services.AddProxyServerSearcherModule();
 
-builder.WebHost.UseKestrelServer();
+builder.AddKestrelServerConfiguration();
+builder.UseKestrelServer();
 
 var app = builder.Build();
 
