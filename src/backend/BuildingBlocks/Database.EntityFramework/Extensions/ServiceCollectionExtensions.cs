@@ -22,9 +22,9 @@ public static class ServiceCollectionExtensions
         }
 
         public IServiceCollection AddEntityFrameworkConfiguration<TConfiguration>()
-            where TConfiguration : IEntityFrameworkConfiguration
+            where TConfiguration : class, IEntityFrameworkConfiguration
         {
-            services.AddSingleton(typeof(IEntityFrameworkConfiguration), typeof(TConfiguration));
+            services.AddSingleton<IEntityFrameworkConfiguration, TConfiguration>();
             
             return services;
         }
@@ -90,9 +90,9 @@ public static class ServiceCollectionExtensions
         }
 
         public IServiceCollection AddPostgresDatabaseConfiguration<TConfiguration>()
-            where TConfiguration : IPostgresDatabaseConfiguration
+            where TConfiguration : class, IPostgresDatabaseConfiguration
         {
-            services.AddSingleton(typeof(IPostgresDatabaseConfiguration), typeof(TConfiguration));
+            services.AddSingleton<IPostgresDatabaseConfiguration, TConfiguration>();
             
             return services;
         }

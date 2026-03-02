@@ -5,7 +5,6 @@ using DotPulsar.Extensions;
 using Messaging.Abstracts.Attributes;
 using Messaging.Abstracts.Distributed;
 using Messaging.Pulsar.Constants;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using IMessage = Messaging.Abstracts.IMessage;
 

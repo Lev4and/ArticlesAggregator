@@ -94,7 +94,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - ./data/keycloak-postgres/data:/var/lib/postgresql/data
+      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/main
     ports:
       - "20001:5432"
     networks:
@@ -142,7 +142,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - ./data/n8n-postgres/data:/var/lib/postgresql/data
+      - ./data/n8n-postgres/data:/var/lib/postgresql/18/main
     ports:
       - "20002:5432"
     networks:
@@ -151,33 +151,33 @@ services:
       mode: replicated
       replicas: 1
       
-#  selenium-hub:
-#    image: selenium/hub:4.41.0
-#    container_name: selenium-hub
-#    restart: always
-#    ports:
-#      - "4442:4442"
-#      - "4443:4443"
-#      - "4444:4444"
-#    networks:
-#      - selenium-hub-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#  
-#  selenium-node-chrome:
-#    image: selenium/node-chrome:145.0-20260222
-#    container_name: selenium-node-chrome
-#    restart: always
-#    environment:
-#      SE_EVENT_BUS_HOST: selenium-hub
-#      SE_EVENT_BUS_PUBLISH_PORT: 4442
-#      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-#    networks:
-#      - selenium-hub-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
+  selenium-hub:
+    image: selenium/hub:4.41.0
+    container_name: selenium-hub
+    restart: always
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    networks:
+      - selenium-hub-network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  selenium-node-chrome:
+    image: selenium/node-chrome:145.0-20260222
+    container_name: selenium-node-chrome
+    restart: always
+    environment:
+      SE_EVENT_BUS_HOST: selenium-hub
+      SE_EVENT_BUS_PUBLISH_PORT: 4442
+      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+    networks:
+      - selenium-hub-network
+    deploy:
+      mode: replicated
+      replicas: 1
   
   opentelemetry-collector:
     image: otel/opentelemetry-collector:0.147.0-nightly.6d94db7
@@ -195,6 +195,9 @@ services:
       - "55679:55679"
     networks:
       - opentelemetry-collector-network
+      - seq-network
+      - jaeger-network
+      - prometheus-network
     deploy:
       mode: replicated
       replicas: 1
@@ -269,8 +272,8 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
-    expose:
-      - "9100"
+    ports:
+      - "9100:9100"
     networks:
       - node-exporter-network
     deploy:
@@ -284,15 +287,12 @@ services:
     volumes:
       - ./data/prometheus:/prometheus
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
-    expose:
-      - "9090"
+    ports:
+      - "9090:9090"
     networks:
       - prometheus-network
-      - pulsar-network
-      - redis-network
-      - minio-network
-      - jaeger-network
       - node-exporter-network
+      - opentelemetry-collector-network
     deploy:
       mode: replicated
       replicas: 1

@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Observability.OpenTelemetry\Observability.OpenTelemetry.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Server.Kestrel\Server.Kestrel.csproj" />
       <ProjectReference Include="..\ProxyServerSearcher.Application\ProxyServerSearcher.Application.csproj" />
       <ProjectReference Include="..\ProxyServerSearcher.Domain\ProxyServerSearcher.Domain.csproj" />

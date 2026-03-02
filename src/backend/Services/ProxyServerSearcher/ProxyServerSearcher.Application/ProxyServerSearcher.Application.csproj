@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\Cqrs.Mediator\Cqrs.Mediator.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Observability.Abstracts\Observability.Abstracts.csproj" />
       <ProjectReference Include="..\ProxyServerSearcher.Domain\ProxyServerSearcher.Domain.csproj" />
     </ItemGroup>
 

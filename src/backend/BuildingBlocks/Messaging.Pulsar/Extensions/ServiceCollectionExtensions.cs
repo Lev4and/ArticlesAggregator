@@ -21,9 +21,9 @@ public static class ServiceCollectionExtensions
         }
 
         public IServiceCollection AddPulsarConfiguration<TConfiguration>()
-            where TConfiguration : IPulsarConfiguration
+            where TConfiguration : class, IPulsarConfiguration
         {
-            services.AddSingleton(typeof(IPulsarConfiguration), typeof(TConfiguration));
+            services.AddSingleton<IPulsarConfiguration, TConfiguration>();
             
             return services;
         }
