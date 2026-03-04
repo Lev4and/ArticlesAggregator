@@ -9,6 +9,11 @@ services:
     restart: always
     healthcheck:
       test: "bin/pulsar-admin brokers healthcheck"
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: pulsar
     environment:
       PULSAR_STANDALONE_USE_ZOOKEEPER: 1
     volumes:
@@ -28,6 +33,11 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: redis
     ports:
       - "6379:6379"
       - "8001:8001"
@@ -43,6 +53,11 @@ services:
     container_name: minio
     restart: always
     command: server --address ":9099" --console-address ":9000" /data
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: minio
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -66,6 +81,11 @@ services:
     restart: always
     depends_on:
       - keycloak-postgres
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: keycloak
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
@@ -89,6 +109,11 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: keycloak-postgres
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: postgres
@@ -109,6 +134,11 @@ services:
     restart: always
     depends_on:
       - n8n-postgres
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: n8n
     environment:
       GENERIC_TIMEZONE: Asia/Yekaterinburg
       TZ: Asia/Yekaterinburg
@@ -137,6 +167,11 @@ services:
     restart: always
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: n8n-postgres
     environment:
       POSTGRES_DB: n8n
       POSTGRES_USER: postgres
@@ -155,6 +190,11 @@ services:
     image: selenium/hub:4.41.0
     container_name: selenium-hub
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: selenium-hub
     ports:
       - "4442:4442"
       - "4443:4443"
@@ -169,6 +209,11 @@ services:
     image: selenium/node-chrome:145.0-20260222
     container_name: selenium-node-chrome
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: selenium-node-chrome
     environment:
       SE_EVENT_BUS_HOST: selenium-hub
       SE_EVENT_BUS_PUBLISH_PORT: 4442
@@ -183,6 +228,11 @@ services:
     image: otel/opentelemetry-collector:0.147.0-nightly.6d94db7
     container_name: opentelemetry-collector
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: opentelemetry-collector
     volumes:
       - ./otel-collector-config.yaml:/etc/otelcol/config.yaml
     ports:
@@ -206,6 +256,10 @@ services:
 #    image: elastic/elasticsearch:9.3.1
 #    container_name: elasticsearch
 #    restart: always
+#    logging:
+#      driver: gelf
+#      options:
+#        gelf-address: udp://0.0.0.0:12201
 #    volumes:
 #      - ./data/elasticsearch:/usr/share/elasticsearch/data
 #    ports:
@@ -223,15 +277,42 @@ services:
     image: datalust/seq:2025.2.14258
     container_name: seq
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: seq
     environment:
       ACCEPT_EULA: Y
       SEQ_PASSWORD: admin
+      GELF_ADDRESS: seq-input-gelf:12201/udp
     volumes:
       - ./data/seq/data:/data
     ports:
       - "5341:5341"
       - "8900:80"
     networks:
+      - seq-network
+      - seq-input-gelf-network
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  seq-input-gelf:
+    image: datalust/seq-input-gelf:3.0.458
+    container_name: seq-input-gelf
+    restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: seq-input-gelf
+    environment:
+      SEQ_ADDRESS: http://seq:5341
+    ports:
+      - "12201:12201/udp"
+    networks:
+      - seq-input-gelf-network
       - seq-network
     deploy:
       mode: replicated
@@ -241,6 +322,11 @@ services:
     image: jaegertracing/all-in-one:1.71.0
     container_name: jaeger
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: jaeger
     environment:
       SPAN_STORAGE_TYPE: badger
       BADGER_EPHEMERAL: "false"
@@ -263,6 +349,11 @@ services:
     image: prom/node-exporter:v1.9.1
     container_name: node-exporter
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: node-exporter
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
@@ -284,6 +375,11 @@ services:
     image: prom/prometheus:v3.5.0
     container_name: prometheus
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: prometheus
     volumes:
       - ./data/prometheus:/prometheus
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
@@ -301,6 +397,11 @@ services:
     image: grafana/grafana:12.2.0-16711121739
     container_name: grafana
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: grafana
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -321,6 +422,11 @@ services:
     image: portainer/portainer-ce:2.38.1
     container_name: portainer
     restart: always
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://0.0.0.0:12201
+        tag: portainer
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/portainer/data:/data
@@ -352,6 +458,8 @@ networks:
   elasticsearch-network:
     driver: overlay
   seq-network:
+    driver: overlay
+  seq-input-gelf-network:
     driver: overlay
   jaeger-network:
     driver: overlay
