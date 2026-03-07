@@ -12,6 +12,16 @@ receivers:
           scrape_interval: 1s
           static_configs:
             - targets: [ 0.0.0.0:8888 ]
+        - job_name: cadvisor
+          static_configs:
+            - targets: [ 'cadvisor:8081' ]
+        - job_name: node-exporter
+          scrape_interval: 1s
+          static_configs:
+            - targets: [ 'node-exporter:9100' ]
+
+processors:
+  batch:
 
 exporters:
   otlp_http/seq:
@@ -34,14 +44,17 @@ extensions:
     endpoint: 0.0.0.0:55679
 
 service:
-  extensions: [health_check, pprof, zpages]
+  extensions: [ health_check, pprof, zpages ]
   pipelines:
     logs:
-      receivers: [otlp]
-      exporters: [otlp_http/seq]
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp_http/seq ]
     traces:
-      receivers: [otlp]
-      exporters: [otlp_grpc/jaeger]
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp_grpc/jaeger ]
     metrics:
-      receivers: [otlp, prometheus]
-      exporters: [prometheus]
+      receivers: [ otlp, prometheus ]
+      processors: [ batch ]
+      exporters: [ prometheus ]

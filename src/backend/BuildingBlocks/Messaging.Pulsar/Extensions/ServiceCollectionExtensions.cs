@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddPulsarMessaging(params Assembly[] assemblies)
         {
             var assembliesTypes = assemblies.GetTypes().ToArray();
-
+            
             services.AddSingleton(serviceProvider =>
             {
                 var pulsarConfiguration = serviceProvider.GetRequiredService<IPulsarConfiguration>();

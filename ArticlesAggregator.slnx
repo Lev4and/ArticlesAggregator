@@ -11,10 +11,12 @@
   <Folder Name="/src/backend/" />
   <Folder Name="/src/backend/BuildingBlocks/">
     <Project Path="src/backend/BuildingBlocks/Caching.Abstracts/Caching.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Caching.Redis/Caching.Redis.csproj" />
     <Project Path="src/backend/BuildingBlocks/Contracts/Contracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Cqrs.Mediator/Cqrs.Mediator.csproj" />
     <Project Path="src/backend/BuildingBlocks/Database.Abstracts/Database.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Database.EntityFramework/Database.EntityFramework.csproj" />
+    <Project Path="src/backend/BuildingBlocks/DomainEvents.Abstracts/DomainEvents.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Extensions/Extensions.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts.Distributed/Messaging.Abstracts.Distributed.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
@@ -22,12 +24,15 @@
     <Project Path="src/backend/BuildingBlocks/Messaging.Messages/Messaging.Messages.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Pulsar/Messaging.Pulsar.csproj" />
     <Project Path="src/backend/BuildingBlocks/Missions.Abstracts/Missions.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Missions.Hosting/Missions.Hosting.csproj" />
     <Project Path="src/backend/BuildingBlocks/ObjectStorage.Abstracts/ObjectStorage.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/ObjectStorage.Amazon/ObjectStorage.Amazon.csproj" />
     <Project Path="src/backend/BuildingBlocks/Observability.Abstracts/Observability.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Observability.OpenTelemetry/Observability.OpenTelemetry.csproj" />
     <Project Path="src/backend/BuildingBlocks/Primitives/Primitives.csproj" />
     <Project Path="src/backend/BuildingBlocks/Result/Result.csproj" />
     <Project Path="src/backend/BuildingBlocks/Server.Kestrel/Server.Kestrel.csproj" />
+    <Project Path="src/backend/BuildingBlocks/StoredTasks.Abstracts/StoredTasks.Abstracts.csproj" />
   </Folder>
   <Folder Name="/src/backend/Services/" />
   <Folder Name="/src/backend/Services/ProxyServerSearcher/">
