@@ -1,7 +1,67 @@
 global:
-  scrape_interval: 1s
+  scrape_interval: 5s
 
 scrape_configs:    
-  - job_name: "opentelemetry-collector"
+  - job_name: opentelemetry-collector-gateway
     static_configs:
-      - targets: [ "opentelemetry-collector:8889" ]
+      - targets: [ 'opentelemetry-collector-gateway:8889' ]
+        
+  - job_name: broker
+    honor_labels: true
+    static_configs:
+      - targets: [ 'pulsar:8080' ]
+        
+  - job_name: bookie
+    honor_labels: true
+    static_configs:
+      - targets: [ 'pulsar:8080' ]
+        
+  - job_name: zookeeper
+    honor_labels: true
+    static_configs:
+      - targets: [ 'pulsar:8080' ]
+        
+  - job_name: minio-cluster
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    fallback_scrape_protocol: PrometheusText1.0.0
+    static_configs:
+      - targets: [ 'minio:9000' ]
+
+  - job_name: minio-bucket
+    metrics_path: /minio/v2/metrics/bucket
+    scheme: http
+    fallback_scrape_protocol: PrometheusText1.0.0
+    static_configs:
+      - targets: [ 'minio:9000' ]
+
+  - job_name: minio-node
+    metrics_path: /minio/v2/metrics/node
+    scheme: http
+    fallback_scrape_protocol: PrometheusText1.0.0
+    static_configs:
+      - targets: [ 'minio:9000' ]
+
+  - job_name: minio-resource
+    metrics_path: /minio/v2/metrics/resource
+    scheme: http
+    fallback_scrape_protocol: PrometheusText1.0.0
+    static_configs:
+      - targets: [ 'minio:9000' ]
+        
+  - job_name: keycloak
+    static_configs:
+      - targets: [
+        'keycloak:9000'
+      ]
+        
+  - job_name: postgres-exporter
+    static_configs:
+      - targets: [
+        'keycloak-postgres-exporter:9187',
+        'n8n-postgres-exporter:9187'
+      ]
+        
+  - job_name: jaeger
+    static_configs:
+      - targets: [ 'jaeger:14629' ]

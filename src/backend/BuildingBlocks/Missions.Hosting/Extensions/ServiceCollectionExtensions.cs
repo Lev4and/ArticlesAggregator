@@ -10,6 +10,11 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddMission<TMission>(IMissionDelay missionDelay)
             where TMission : class, IMission
         {
+            services.AddScoped<TMission>();
+
+            services.AddHostedService<MissionWorker<TMission>>(provider => 
+                ActivatorUtilities.CreateInstance<MissionWorker<TMission>>(provider, missionDelay));
+            
             return services;
         }
     }

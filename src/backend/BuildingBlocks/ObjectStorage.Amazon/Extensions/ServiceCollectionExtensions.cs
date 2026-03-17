@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using Amazon;
+using Amazon.S3;
 using Microsoft.Extensions.DependencyInjection;
 using ObjectStorage.Abstracts;
 using ObjectStorage.Amazon.Configurations;

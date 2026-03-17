@@ -13,7 +13,6 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
         var dbContext = eventData.Context;
-
         if (dbContext is null)
         {
             return base.SavingChangesAsync(eventData, result, cancellationToken);

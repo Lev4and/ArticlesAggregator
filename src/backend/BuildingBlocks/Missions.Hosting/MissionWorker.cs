@@ -27,7 +27,7 @@ public abstract class MissionWorker<TMission> : BackgroundService
             try
             {
                 await using var scope = _serviceScopeFactory.CreateAsyncScope();
-
+                
                 var mission = (IMission)scope.ServiceProvider.GetRequiredService(typeof(TMission));
                 
                 await RunMissionAsync(mission, stoppingToken);

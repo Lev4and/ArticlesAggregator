@@ -1,8 +1,13 @@
 <Solution>
   <Folder Name="/deploy/" />
   <Folder Name="/deploy/docker/">
-    <File Path="deploy/docker/docker-compose-local.yaml" />
-    <File Path="deploy/docker/otel-collector-config.yaml" />
+    <File Path="deploy/docker/docker-cluster-local-init.sh" />
+    <File Path="deploy/docker/docker-cluster-local-start.sh" />
+    <File Path="deploy/docker/docker-cluster-local-stop.sh" />
+    <File Path="deploy/docker/docker-cluster-local.yaml" />
+    <File Path="deploy/docker/nginx.conf" />
+    <File Path="deploy/docker/otel-collector-agent-config.yaml" />
+    <File Path="deploy/docker/otel-collector-gateway-config.yaml" />
     <File Path="deploy/docker/prometheus.yaml" />
   </Folder>
   <Folder Name="/deploy/k8s/" />
@@ -17,6 +22,8 @@
     <Project Path="src/backend/BuildingBlocks/Database.Abstracts/Database.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Database.EntityFramework/Database.EntityFramework.csproj" />
     <Project Path="src/backend/BuildingBlocks/DomainEvents.Abstracts/DomainEvents.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/DomainEvents.Database.Abstracts/DomainEvents.Database.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/DomainEvents.Database.EntityFramework/DomainEvents.Database.EntityFramework.csproj" />
     <Project Path="src/backend/BuildingBlocks/Extensions/Extensions.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts.Distributed/Messaging.Abstracts.Distributed.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
@@ -33,6 +40,7 @@
     <Project Path="src/backend/BuildingBlocks/Result/Result.csproj" />
     <Project Path="src/backend/BuildingBlocks/Server.Kestrel/Server.Kestrel.csproj" />
     <Project Path="src/backend/BuildingBlocks/StoredTasks.Abstracts/StoredTasks.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/StoredTasks.Database.Abstracts/StoredTasks.Database.Abstracts.csproj" />
   </Folder>
   <Folder Name="/src/backend/Services/" />
   <Folder Name="/src/backend/Services/ProxyServerSearcher/">
