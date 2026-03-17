@@ -1,0 +1,728 @@
+version: '3.9'
+
+x-logging:  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "1"
+    tag: "{{.Name}}"
+
+services:
+  pulsar:
+    image: apachepulsar/pulsar:4.0.5
+    container_name: pulsar
+    command: >
+      /bin/bash -c "bin/apply-config-from-env.py conf/standalone.conf && bin/pulsar standalone"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "bin/pulsar-admin", "brokers", "healthcheck" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      PULSAR_STANDALONE_USE_ZOOKEEPER: 1
+    volumes:
+      - ./data/pulsar/data:/pulsar/data
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+    networks:
+      - pulsar-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  redis:
+    image: redis/redis-stack:7.2.0-v18
+    container_name: redis
+    restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    volumes:
+      - ./data/redis/data:/data
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+      - "16379:16379"
+    networks:
+      - redis-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: minio
+    restart: always
+    command: server --address "0.0.0.0:9000" --console-address "0.0.0.0:9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+    volumes:
+      - ./data/minio/data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - minio-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    container_name: keycloak
+    command:
+      - start-dev
+    restart: always
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/live" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+    logging: *default-logging
+    depends_on:
+      - keycloak-postgres
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8090:8080"
+    expose:
+      - "9000"
+    networks:
+      - keycloak-network
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  keycloak-postgres:
+    image: postgres:18.3
+    container_name: keycloak-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/main
+    ports:
+      - "20001:5432"
+    networks:
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  keycloak-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: keycloak-postgres-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - keycloak-postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@keycloak-postgres:5432/keycloak?sslmode=disable"
+    expose:
+      - "9187"
+    networks:
+      - keycloak-postgres-exporter-network
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1.123.21
+    container_name: n8n
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - n8n-postgres
+    environment:
+      GENERIC_TIMEZONE: Asia/Yekaterinburg
+      TZ: Asia/Yekaterinburg
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_RUNNERS_ENABLED: "true"
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_HOST: n8n-postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: postgres
+      DB_POSTGRESDB_SCHEMA: public
+      DB_POSTGRESDB_PASSWORD: postgres
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - n8n-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  n8n-postgres:
+    image: postgres:18.3
+    container_name: n8n-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/n8n-postgres/data:/var/lib/postgresql/18/main
+    ports:
+      - "20002:5432"
+    networks:
+      - n8n-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  n8n-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: n8n-postgres-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - n8n-postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@n8n-postgres:5432/n8n?sslmode=disable"
+    expose:
+      - "9187"
+    networks:
+      - n8n-postgres-exporter-network
+      - n8n-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      
+  selenium-hub:
+    image: selenium/hub:4.41.0
+    container_name: selenium-hub
+    restart: always
+    logging: *default-logging
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    networks:
+      - selenium-hub-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  selenium-node-chrome:
+    image: selenium/node-chrome:145.0-20260222
+    container_name: selenium-node-chrome
+    restart: always
+    logging: *default-logging
+    environment:
+      SE_EVENT_BUS_HOST: selenium-hub
+      SE_EVENT_BUS_PUBLISH_PORT: 4442
+      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
+    networks:
+      - selenium-hub-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  opentelemetry-collector-agent:
+    image: otel/opentelemetry-collector-contrib:0.147.0-nightly.6d94db7
+    container_name: opentelemetry-collector-agent
+    command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
+    restart: always
+#    healthcheck:
+#      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133"]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+    logging: *default-logging
+    user: "0:0"
+    volumes:
+      - ./otel-collector-agent-config.yaml:/etc/otelcol-contrib/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    expose:
+      - "1888"
+      - "8888"
+      - "8889"
+      - "13133"
+      - "55679"
+    networks:
+      - opentelemetry-collector-agent-network
+      - opentelemetry-collector-gateway-network
+      - node-exporter-network
+      - cadvisor-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  opentelemetry-collector-gateway:
+    image: otel/opentelemetry-collector-contrib:0.147.0-nightly.6d94db7
+    container_name: opentelemetry-collector-gateway
+    command: [ "--config=/etc/otelcol-contrib/config.yaml" ]
+    restart: always
+#    healthcheck:
+#      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133"]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+    logging: *default-logging
+    user: "0:0"
+    volumes:
+      - ./otel-collector-gateway-config.yaml:/etc/otelcol-contrib/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    expose:
+      - "4317"
+      - "4318"
+      - "1888"
+      - "8888"
+      - "8889"
+      - "13133"
+      - "55679"
+    networks:
+      - opentelemetry-collector-gateway-network
+      - prometheus-network
+      - jaeger-network
+      - seq-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+#  elasticsearch:
+#    image: elastic/elasticsearch:9.3.1
+#    container_name: elasticsearch
+#    restart: always
+#    logging:
+#      driver: gelf
+#      options:
+#        gelf-address: udp://0.0.0.0:12201
+#        tag: elasticsearch
+#    volumes:
+#      - ./data/elasticsearch:/usr/share/elasticsearch/data
+#    ports:
+#      - "9200:9200"
+#    environment:
+#      discovery.type: single-node
+#      xpack.security.enabled: "false"
+#    networks:
+#      - elasticsearch-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+  
+  seq:
+    image: datalust/seq:2025.2.14258
+    container_name: seq
+    restart: always
+#    healthcheck:
+#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost/api/health" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+    logging: *default-logging
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_PASSWORD: admin
+    volumes:
+      - ./data/seq/data:/data
+    ports:
+      - "8900:80"
+    expose:
+      - "5341"
+    networks:
+      - seq-network
+      - seq-input-gelf-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  seq-input-gelf:
+    image: datalust/seq-input-gelf:3.0.458
+    container_name: seq-input-gelf
+    restart: always
+    logging: *default-logging
+    environment:
+      SEQ_ADDRESS: http://seq:5341
+    ports:
+      - "12201:12201/udp"
+    networks:
+      - seq-input-gelf-network
+      - seq-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  jaeger:
+    image: jaegertracing/all-in-one:1.71.0
+    container_name: jaeger
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:14269" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    volumes:
+      - ./data/jaeger:/badger
+    ports:
+      - "16686:16686"
+    expose:
+      - "4317"
+      - "4318"
+      - "14269"
+    networks:
+      - jaeger-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: node-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9100/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    expose:
+      - "9100"
+    networks:
+      - node-exporter-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8080"
+    networks:
+      - cadvisor-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    restart: always
+#    healthcheck:
+#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9090/-/ready" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+    logging: *default-logging
+    volumes:
+      - ./data/prometheus:/prometheus
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - prometheus-network
+      - opentelemetry-collector-gateway-network
+      - pulsar-network
+      - redis-network
+      - minio-network
+      - keycloak-network
+      - keycloak-postgres-exporter-network
+      - n8n-postgres-exporter-network
+      - jaeger-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  grafana:
+    image: grafana/grafana:12.2.0-16711121739
+    container_name: grafana
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_ROOT_URL: http://localhost:3000
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./data/grafana/data:/var/lib/grafana
+      - ./data/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    networks:
+      - prometheus-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  portainer:
+    image: portainer/portainer-ce:2.38.1
+    container_name: portainer
+    restart: always
+#    healthcheck:
+#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9000/api/system/status" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+    logging: *default-logging
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/portainer/data:/data
+    ports:
+      - "9443:9443"
+      - "9442:9000"
+      - "8000:8000"
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  nginx:
+    image: nginx:1.29.6
+    container_name: nginx
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:80/health" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - nginx-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+networks:
+  pulsar-network:
+    driver: overlay
+  redis-network:
+    driver: overlay
+  minio-network:
+    driver: overlay
+  keycloak-network:
+    driver: overlay
+  keycloak-postgres-network:
+    driver: overlay
+  keycloak-postgres-exporter-network:
+    driver: overlay
+  n8n-postgres-network:
+    driver: overlay
+  n8n-postgres-exporter-network:
+    driver: overlay
+  selenium-hub-network:
+    driver: overlay
+  opentelemetry-collector-agent-network:
+    driver: overlay
+  opentelemetry-collector-gateway-network:
+    driver: overlay
+  elasticsearch-network:
+    driver: overlay
+  seq-network:
+    driver: overlay
+  seq-input-gelf-network:
+    driver: overlay
+  jaeger-network:
+    driver: overlay
+  node-exporter-network:
+    driver: overlay
+  cadvisor-network:
+    driver: overlay
+  prometheus-network:
+    driver: overlay
+  nginx-network:
+    driver: overlay
