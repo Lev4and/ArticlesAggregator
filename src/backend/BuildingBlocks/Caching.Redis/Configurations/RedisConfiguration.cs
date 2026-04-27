@@ -8,18 +8,17 @@ public class RedisConfiguration : IRedisConfiguration
     private const string REDIS_PORT = nameof(REDIS_PORT);
     private const string REDIS_USERNAME = nameof(REDIS_USERNAME);
     private const string REDIS_PASSWORD = nameof(REDIS_PASSWORD);
+    private const string REDIS_PREFIX_KEY = nameof(REDIS_PREFIX_KEY);
     
     // ReSharper restore InconsistentNaming
     
-    public string Host => Environment.GetEnvironmentVariable(REDIS_HOST) 
-        ?? throw new ArgumentException($"{nameof(REDIS_HOST)} environment variable is not set.");
+    public string Host => Environment.GetEnvironmentVariable(REDIS_HOST) ?? "localhost";
     
-    public int Port => int.Parse(Environment.GetEnvironmentVariable(REDIS_PORT) 
-        ?? throw new ArgumentException($"{nameof(REDIS_PORT)} environment variable is not set."));
+    public int Port => int.Parse(Environment.GetEnvironmentVariable(REDIS_PORT) ?? "6379");
 
-    public string Username => Environment.GetEnvironmentVariable(REDIS_USERNAME) 
-        ?? throw new ArgumentException($"{nameof(REDIS_USERNAME)} environment variable is not set.");
+    public string? Username => Environment.GetEnvironmentVariable(REDIS_USERNAME);
     
-    public string Password => Environment.GetEnvironmentVariable(REDIS_PASSWORD) 
-        ?? throw new ArgumentException($"{nameof(REDIS_PASSWORD)} environment variable is not set.");
+    public string? Password => Environment.GetEnvironmentVariable(REDIS_PASSWORD);
+    
+    public string? PrefixKey => Environment.GetEnvironmentVariable(REDIS_PREFIX_KEY);
 }

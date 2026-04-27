@@ -4,7 +4,7 @@ using Database.Abstracts;
 using Database.EntityFramework.Configurations;
 
 using Extensions;
-
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -47,6 +47,7 @@ public static class ServiceCollectionExtensions
                 var configuration = serviceProvider.GetRequiredService<IEntityFrameworkConfiguration>();
 
                 options.UseDatabase(serviceProvider, configuration.DatabaseType);
+                options.UseSnakeCaseNamingConvention();
 
                 var saveChangesInterceptors = serviceProvider.GetServices<ISaveChangesInterceptor>();
                 

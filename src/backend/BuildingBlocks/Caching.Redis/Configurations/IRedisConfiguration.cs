@@ -6,7 +6,9 @@ public interface IRedisConfiguration
     
     int Port { get; }
     
-    string Username { get; }
+    string? Username { get; }
     
-    string Password { get; }
+    string? Password { get; }
+    
+    string? PrefixKey { get; }
 }

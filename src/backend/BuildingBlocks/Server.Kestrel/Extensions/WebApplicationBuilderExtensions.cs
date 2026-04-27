@@ -11,26 +11,14 @@ public static class WebApplicationBuilderExtensions
 {
     extension(WebApplicationBuilder builder)
     {
-        public WebApplicationBuilder AddKestrelServerConfiguration()
+        public WebApplicationBuilder UseKestrelServer(IKestrelServerConfiguration? serverConfiguration = null)
         {
-            builder.Services.AddSingleton<IKestrelServerConfiguration, KestrelServerConfiguration>();
-        
-            return builder;
-        }
-
-        public WebApplicationBuilder AddKestrelServerConfiguration<TConfiguration>()
-            where TConfiguration : IKestrelServerConfiguration
-        {
-            builder.Services.AddSingleton(typeof(IKestrelServerConfiguration), typeof(TConfiguration));
+            serverConfiguration ??= new KestrelServerConfiguration();
             
-            return builder;
-        }
-
-        public WebApplicationBuilder UseKestrelServer()
-        {
+            builder.Services.AddSingleton(serverConfiguration);
+            
             var serviceProvider = builder.Services.BuildServiceProvider();
-        
-            var configuration = serviceProvider.GetRequiredService<IKestrelServerConfiguration>();
+            var configuration   = serviceProvider.GetRequiredService<IKestrelServerConfiguration>();
             
             builder.WebHost.UseKestrel(options =>
             {

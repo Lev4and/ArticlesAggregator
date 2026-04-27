@@ -20,9 +20,9 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
     }
     
     public async Task<IDatabaseTransaction> BeginTransactionAsync(
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var transaction = await Database.BeginTransactionAsync(cancellationToken);
+        var transaction = await Database.BeginTransactionAsync(ct);
         
         return new EntityFrameworkTransaction(transaction);
     }

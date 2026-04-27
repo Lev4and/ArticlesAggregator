@@ -2,7 +2,7 @@
 
 public interface IUnitOfWork
 {
-    Task<IDatabaseTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task<IDatabaseTransaction> BeginTransactionAsync(CancellationToken ct = default);
     
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

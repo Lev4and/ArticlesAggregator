@@ -21,6 +21,14 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
         var utcNow = DateTime.UtcNow;
 
         dbContext.ChangeTracker.Entries<IHasSoftDelete>()
+            .Where(entry => entry is { State: EntityState.Modified, Entity.IsDeleted: true })
+            .ForEach(entry =>
+            {
+                entry.Entity.IsDeleted = false;
+                entry.Entity.DeletedAt = null;
+            });
+        
+        dbContext.ChangeTracker.Entries<IHasSoftDelete>()
             .Where(entry => entry.State == EntityState.Deleted)
             .ForEach(entry =>
             {
@@ -28,14 +36,6 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
 
                 entry.Entity.IsDeleted = true;
                 entry.Entity.DeletedAt = utcNow;
-            });
-        
-        dbContext.ChangeTracker.Entries<IHasSoftDelete>()
-            .Where(entry => entry is { State: EntityState.Modified, Entity.IsDeleted: true })
-            .ForEach(entry =>
-            {
-                entry.Entity.IsDeleted = false;
-                entry.Entity.DeletedAt = null;
             });
 
         return base.SavingChangesAsync(eventData, result, cancellationToken);

@@ -10,34 +10,23 @@ public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddRedisConfiguration()
+        public IServiceCollection AddRedisMemoryCache(IRedisConfiguration? redisConfiguration = null)
         {
-            services.AddSingleton<IRedisConfiguration, RedisConfiguration>();
+            redisConfiguration ??= new RedisConfiguration();
             
-            return services;
-        }
-
-        public IServiceCollection AddRedisConfiguration<TConfiguration>()
-            where TConfiguration : class, IRedisConfiguration
-        {
-            services.AddSingleton<IRedisConfiguration, TConfiguration>();
+            services.AddSingleton(redisConfiguration);
             
-            return services;
-        }
-        
-        public IServiceCollection AddRedisMemoryCache()
-        {
             var serviceProvider = services.BuildServiceProvider();
-            
-            var configuration = serviceProvider.GetRequiredService<IRedisConfiguration>();
+            var configuration   = serviceProvider.GetRequiredService<IRedisConfiguration>();
             
             services.AddStackExchangeRedisCache(options =>
             {
                 options.ConfigurationOptions = new ConfigurationOptions
                 {
-                    EndPoints = [new DnsEndPoint(configuration.Host, configuration.Port)],
-                    User = configuration.Username,
-                    Password = configuration.Password
+                    EndPoints   = [new DnsEndPoint(configuration.Host, configuration.Port)],
+                    User        = configuration.Username,
+                    Password    = configuration.Password, 
+                    ServiceName = configuration.PrefixKey
                 };
             });
 

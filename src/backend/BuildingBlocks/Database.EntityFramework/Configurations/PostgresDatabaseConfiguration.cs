@@ -12,18 +12,13 @@ public class PostgresDatabaseConfiguration : IPostgresDatabaseConfiguration
     
     // ReSharper restore InconsistentNaming
     
-    public string Host => Environment.GetEnvironmentVariable(POSTGRES_HOST) 
-        ?? throw new ArgumentException($"{nameof(POSTGRES_HOST)} environment variable is not set.");
+    public string Host => Environment.GetEnvironmentVariable(POSTGRES_HOST) ?? "localhost";
     
-    public int Port => int.Parse(Environment.GetEnvironmentVariable(POSTGRES_PORT) 
-        ?? throw new ArgumentException($"{nameof(POSTGRES_PORT)} environment variable is not set."));
+    public int Port => int.Parse(Environment.GetEnvironmentVariable(POSTGRES_PORT) ?? "5432");
     
-    public string Database => Environment.GetEnvironmentVariable(POSTGRES_DATABASE) 
-        ?? throw new ArgumentException($"{nameof(POSTGRES_DATABASE)} environment variable is not set.");
+    public string Database => Environment.GetEnvironmentVariable(POSTGRES_DATABASE) ?? "postgres";
     
-    public string Username => Environment.GetEnvironmentVariable(POSTGRES_USERNAME) 
-        ?? throw new ArgumentException($"{nameof(POSTGRES_USERNAME)} environment variable is not set.");
+    public string Username => Environment.GetEnvironmentVariable(POSTGRES_USERNAME) ?? "postgres";
     
-    public string Password => Environment.GetEnvironmentVariable(POSTGRES_PASSWORD) 
-        ?? throw new ArgumentException($"{nameof(POSTGRES_PASSWORD)} environment variable is not set.");
+    public string Password => Environment.GetEnvironmentVariable(POSTGRES_PASSWORD) ?? "postgres";
 }

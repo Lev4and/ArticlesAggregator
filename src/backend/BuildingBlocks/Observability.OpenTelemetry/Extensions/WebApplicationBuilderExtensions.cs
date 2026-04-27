@@ -15,23 +15,13 @@ public static class WebApplicationBuilderExtensions
 {
     extension(WebApplicationBuilder builder)
     {
-        public WebApplicationBuilder AddOpenTelemetryConfiguration()
+        public WebApplicationBuilder AddObservabilityOpenTelemetry(string serviceName, 
+            IOpenTelemetryConfiguration? openTelemetryConfiguration = null)
         {
-            builder.Services.AddSingleton<IOpenTelemetryConfiguration, OpenTelemetryConfiguration>();
-        
-            return builder;
-        }
-
-        public WebApplicationBuilder AddOpenTelemetryConfiguration<TConfiguration>()
-            where TConfiguration : class, IOpenTelemetryConfiguration
-        {
-            builder.Services.AddSingleton<IOpenTelemetryConfiguration, TConfiguration>();
-        
-            return builder;
-        }
-
-        public WebApplicationBuilder AddObservabilityOpenTelemetry(string serviceName)
-        {
+            openTelemetryConfiguration ??= new OpenTelemetryConfiguration();
+            
+            builder.Services.AddSingleton(openTelemetryConfiguration);
+            
             builder.Host.UseSerilog((context, serviceProvider, loggerConfiguration) =>
             {
                 var configuration = serviceProvider.GetRequiredService<IOpenTelemetryConfiguration>();

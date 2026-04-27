@@ -10,9 +10,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediator(options =>
         {
-            options.ServiceLifetime = ServiceLifetime.Scoped;
+            options.ServiceLifetime         = ServiceLifetime.Scoped;
             options.GenerateTypesAsInternal = true;
-            options.Assemblies = [..assembliesToScan];
+            options.Assemblies              = [..assembliesToScan];
         });
         
         return services;

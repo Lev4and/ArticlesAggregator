@@ -1,6 +1,6 @@
 ﻿namespace Result;
 
-public class AppResult
+public record AppResult
 {
     private readonly List<AppError> _errors = new();
     
@@ -10,7 +10,7 @@ public class AppResult
     
     public bool IsFailure => !IsSuccess;
 
-    public List<AppError> Errors => _errors;
+    public IEnumerable<AppError> Errors => _errors;
 
     public AppResult(bool isSuccess, AppError error) : this(isSuccess, [error])
     {
@@ -34,9 +34,14 @@ public class AppResult
     
     public static AppResult Success() => new(true, []);
     
+    public static AppResult Failure(AppErrorType type, string message, string? code = null) => 
+        new(false, new AppError(type, message, Code: code));
+    
     public static AppResult Failure(AppError error) => new(false, error);
     
     public static AppResult Failure(AppError[] errors) => new(false, errors);
+    
+    public static AppResult Failure(AppResult result) => new(false, result.Errors.ToArray());
 
     public void AddError(AppError error)
     {
@@ -53,19 +58,28 @@ public class AppResult
     }
 }
 
-public class AppResult<TResult> : AppResult
+public record AppResult<TResult> : AppResult
 {
-    public TResult Result { get; }
+    public TResult? Result { get; }
     
-    public AppResult(bool isSuccess, TResult result, AppError error) : this(isSuccess, result, [error])
+    public AppResult(bool isSuccess, TResult? result, AppError error) : this(isSuccess, result, [error])
     {
         
     }
 
-    public AppResult(bool isSuccess, TResult result, AppError[] errors) : base(isSuccess, errors)
+    public AppResult(bool isSuccess, TResult? result, AppError[] errors) : base(isSuccess, errors)
     {
         Result = result;
     }
     
     public static AppResult<TResult> Success(TResult result) => new(true, result, []);
+
+    public new static AppResult<TResult> Failure(AppErrorType type, string message, string? code = null) =>
+        new(false, default, new AppError(type, message, Code: code));
+    
+    public new static AppResult<TResult> Failure(AppError error) => new(false, default, error);
+    
+    public new static AppResult<TResult> Failure(AppError[] errors) => new(false, default, errors);
+
+    public new static AppResult<TResult> Failure(AppResult result) => new(false, default, result.Errors.ToArray());
 }
