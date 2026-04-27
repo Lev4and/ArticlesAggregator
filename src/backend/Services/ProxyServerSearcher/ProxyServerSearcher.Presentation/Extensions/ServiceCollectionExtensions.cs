@@ -12,8 +12,6 @@ public static class ServiceCollectionExtensions
         services.AddHttpLogging(options =>
         {
             options.LoggingFields = HttpLoggingFields.All;
-            options.RequestBodyLogLimit = 1024 * 1024;
-            options.ResponseBodyLogLimit = 1024 * 1024;
         });
         
         services.AddOpenApi();

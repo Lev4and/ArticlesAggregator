@@ -8,22 +8,116 @@ x-logging:  &default-logging
     tag: "{{.Name}}"
 
 services:
-  pulsar:
-    image: apachepulsar/pulsar:4.0.5
-    container_name: pulsar
-    command: >
-      /bin/bash -c "bin/apply-config-from-env.py conf/standalone.conf && bin/pulsar standalone"
+  zookeeper:
+    image: apachepulsar/pulsar:4.2.0
+    container_name: zookeeper
     restart: always
+    command:
+      - bash
+      - -c
+      - |
+        bin/apply-config-from-env.py conf/zookeeper.conf && \
+        bin/generate-zookeeper-config.sh conf/zookeeper.conf && \
+        exec bin/pulsar zookeeper
     healthcheck:
-      test: [ "CMD", "bin/pulsar-admin", "brokers", "healthcheck" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
+      test: [ "CMD", "bin/pulsar-zookeeper-ruok.sh" ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
     logging: *default-logging
-    environment:
-      PULSAR_STANDALONE_USE_ZOOKEEPER: 1
     volumes:
-      - ./data/pulsar/data:/pulsar/data
+      - ./data/zookeeper:/pulsar/data/zookeeper
+    environment:
+      - metadataStoreUrl=zk:zookeeper:2181
+      - PULSAR_MEM=-Xms256m -Xmx256m -XX:MaxDirectMemorySize=256m
+    networks:
+      - pulsar-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  pulsar-init:
+    image: apachepulsar/pulsar:4.2.0
+    container_name: pulsar-init
+    hostname: pulsar-init
+    command:
+      - bash
+      - -c
+      - |
+        bin/pulsar initialize-cluster-metadata \
+        --cluster cluster-a \
+        --zookeeper zookeeper:2181 \
+        --configuration-store zookeeper:2181 \
+        --web-service-url http://broker:8080 \
+        --broker-service-url pulsar://broker:6650
+    restart: on-failure
+    logging: *default-logging
+    depends_on:
+      - zookeeper
+    networks:
+      - pulsar-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  bookie:
+    image: apachepulsar/pulsar:4.2.0
+    container_name: bookie
+    command: bash -c "bin/apply-config-from-env.py conf/bookkeeper.conf && exec bin/pulsar bookie"
+    restart: on-failure
+    logging: *default-logging
+    depends_on:
+      - zookeeper
+      - pulsar-init
+    environment:
+      - clusterName=cluster-a
+      - zkServers=zookeeper:2181
+      - metadataServiceUri=metadata-store:zk:zookeeper:2181
+      - advertisedAddress=bookie
+      - BOOKIE_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
+    volumes:
+      - ./data/bookkeeper:/pulsar/data/bookkeeper
+    networks:
+      - pulsar-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  broker:
+    image: apachepulsar/pulsar:4.2.0
+    container_name: broker
+    hostname: broker
+    restart: on-failure
+    command: bash -c "bin/apply-config-from-env.py conf/broker.conf && exec bin/pulsar broker"
+    logging: *default-logging
+    depends_on:
+      - zookeeper
+      - bookie
+    environment:
+      - metadataStoreUrl=zk:zookeeper:2181
+      - zookeeperServers=zookeeper:2181
+      - clusterName=cluster-a
+      - managedLedgerDefaultEnsembleSize=1
+      - managedLedgerDefaultWriteQuorum=1
+      - managedLedgerDefaultAckQuorum=1
+      - advertisedAddress=broker
+      - advertisedListeners=external:pulsar://127.0.0.1:6650
+      - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
     ports:
       - "6650:6650"
       - "8080:8080"
@@ -149,7 +243,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/main
+      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/docker
     ports:
       - "20001:5432"
     networks:
@@ -182,142 +276,6 @@ services:
     networks:
       - keycloak-postgres-exporter-network
       - keycloak-postgres-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-  
-  n8n:
-    image: docker.n8n.io/n8nio/n8n:1.123.21
-    container_name: n8n
-    restart: always
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:5678/healthz" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    depends_on:
-      - n8n-postgres
-    environment:
-      GENERIC_TIMEZONE: Asia/Yekaterinburg
-      TZ: Asia/Yekaterinburg
-      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
-      N8N_RUNNERS_ENABLED: "true"
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_HOST: n8n-postgres
-      DB_POSTGRESDB_PORT: 5432
-      DB_POSTGRESDB_USER: postgres
-      DB_POSTGRESDB_SCHEMA: public
-      DB_POSTGRESDB_PASSWORD: postgres
-    volumes:
-      - ./data/n8n:/home/node/.n8n
-    ports:
-      - "5678:5678"
-    networks:
-      - n8n-postgres-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-
-  n8n-postgres:
-    image: postgres:18.3
-    container_name: n8n-postgres
-    restart: always
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    environment:
-      POSTGRES_DB: n8n
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - ./data/n8n-postgres/data:/var/lib/postgresql/18/main
-    ports:
-      - "20002:5432"
-    networks:
-      - n8n-postgres-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-  
-  n8n-postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:latest
-    container_name: n8n-postgres-exporter
-    restart: always
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    depends_on:
-      - n8n-postgres
-    environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:postgres@n8n-postgres:5432/n8n?sslmode=disable"
-    expose:
-      - "9187"
-    networks:
-      - n8n-postgres-exporter-network
-      - n8n-postgres-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-      
-  selenium-hub:
-    image: selenium/hub:4.41.0
-    container_name: selenium-hub
-    restart: always
-    logging: *default-logging
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
-    networks:
-      - selenium-hub-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-
-  selenium-node-chrome:
-    image: selenium/node-chrome:145.0-20260222
-    container_name: selenium-node-chrome
-    restart: always
-    logging: *default-logging
-    environment:
-      SE_EVENT_BUS_HOST: selenium-hub
-      SE_EVENT_BUS_PUBLISH_PORT: 4442
-      SE_EVENT_BUS_SUBSCRIBE_PORT: 4443
-    networks:
-      - selenium-hub-network
     deploy:
       mode: replicated
       replicas: 1
@@ -402,28 +360,6 @@ services:
         failure_action: rollback
         delay: 10s
   
-#  elasticsearch:
-#    image: elastic/elasticsearch:9.3.1
-#    container_name: elasticsearch
-#    restart: always
-#    logging:
-#      driver: gelf
-#      options:
-#        gelf-address: udp://0.0.0.0:12201
-#        tag: elasticsearch
-#    volumes:
-#      - ./data/elasticsearch:/usr/share/elasticsearch/data
-#    ports:
-#      - "9200:9200"
-#    environment:
-#      discovery.type: single-node
-#      xpack.security.enabled: "false"
-#    networks:
-#      - elasticsearch-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-  
   seq:
     image: datalust/seq:2025.2.14258
     container_name: seq
@@ -434,6 +370,8 @@ services:
 #      timeout: 30s
 #      retries: 5
     logging: *default-logging
+    depends_on:
+      - seq-input-gelf
     environment:
       ACCEPT_EULA: Y
       SEQ_PASSWORD: admin
@@ -593,7 +531,6 @@ services:
       - minio-network
       - keycloak-network
       - keycloak-postgres-exporter-network
-      - n8n-postgres-exporter-network
       - jaeger-network
     deploy:
       mode: replicated
@@ -660,32 +597,6 @@ services:
         order: start-first
         failure_action: rollback
         delay: 10s
-  
-  nginx:
-    image: nginx:1.29.6
-    container_name: nginx
-    restart: always
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:80/health" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - nginx-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
 
 networks:
   pulsar-network:
@@ -700,17 +611,11 @@ networks:
     driver: overlay
   keycloak-postgres-exporter-network:
     driver: overlay
-  n8n-postgres-network:
-    driver: overlay
-  n8n-postgres-exporter-network:
-    driver: overlay
   selenium-hub-network:
     driver: overlay
   opentelemetry-collector-agent-network:
     driver: overlay
   opentelemetry-collector-gateway-network:
-    driver: overlay
-  elasticsearch-network:
     driver: overlay
   seq-network:
     driver: overlay
@@ -723,6 +628,4 @@ networks:
   cadvisor-network:
     driver: overlay
   prometheus-network:
-    driver: overlay
-  nginx-network:
     driver: overlay

@@ -1,17 +1,14 @@
 <Solution>
   <Folder Name="/deploy/" />
   <Folder Name="/deploy/docker/">
-    <File Path="deploy/docker/docker-cluster-local-init.sh" />
-    <File Path="deploy/docker/docker-cluster-local-start.sh" />
-    <File Path="deploy/docker/docker-cluster-local-stop.sh" />
-    <File Path="deploy/docker/docker-cluster-local.yaml" />
-    <File Path="deploy/docker/nginx.conf" />
+    <File Path="deploy/docker/docker-compose.yaml" />
     <File Path="deploy/docker/otel-collector-agent-config.yaml" />
     <File Path="deploy/docker/otel-collector-gateway-config.yaml" />
     <File Path="deploy/docker/prometheus.yaml" />
   </Folder>
   <Folder Name="/deploy/k8s/" />
   <Folder Name="/docs/" />
+  <Folder Name="/samples/" />
   <Folder Name="/src/" />
   <Folder Name="/src/backend/" />
   <Folder Name="/src/backend/BuildingBlocks/">

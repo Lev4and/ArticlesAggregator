@@ -5,44 +5,13 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-  filelog/docker:
-    include:
-      - /var/lib/docker/containers/*/*-json.log
-    poll_interval: 5s
-    start_at: end
-    include_file_path: false
-    include_file_name: false
-    operators:
-      - id: extract_body
-        type: json_parser
-        parse_from: body
-        parse_to: attributes
-        on_error: drop
-      - id: extract_log
-        type: json_parser
-        parse_from: attributes.log
-        parse_to: attributes
-        on_error: send
   prometheus:
     config:
       scrape_configs:
         - job_name: opentelemetry-collector-agent
-          scrape_interval: 1s
+          scrape_interval: 5s
           static_configs:
-            - targets: [
-              0.0.0.0:8888
-            ]
-        - job_name: node-exporter
-          scrape_interval: 1s
-          static_configs:
-            - targets: [
-              'node-exporter:9100'
-            ]
-        - job_name: cadvisor
-          static_configs:
-            - targets: [
-              'cadvisor:8080'
-            ]
+            - targets: [ 0.0.0.0:8888 ]
 
 processors:
   batch:
@@ -66,10 +35,10 @@ extensions:
     endpoint: 0.0.0.0:55679
 
 service:
-  extensions: [health_check, pprof, zpages]
+  extensions: [ health_check, pprof, zpages ]
   pipelines:
     logs:
-      receivers: [ otlp, filelog/docker ]
+      receivers: [ otlp ]
       processors: [ batch ]
       exporters: [ otlp_grpc/gateway ]
     traces:

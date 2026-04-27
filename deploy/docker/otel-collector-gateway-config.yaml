@@ -34,7 +34,7 @@ extensions:
     endpoint: 0.0.0.0:55679
 
 service:
-  extensions: [health_check, pprof, zpages]
+  extensions: [ health_check, pprof, zpages ]
   pipelines:
     logs:
       receivers: [ otlp ]
@@ -43,7 +43,7 @@ service:
     traces:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ otlp_grpc/jaeger, otlp_http/seq_logs ]
+      exporters: [ otlp_grpc/jaeger, otlp_http/seq_traces ]
     metrics:
       receivers: [ otlp ]
       processors: [ batch ]

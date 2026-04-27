@@ -1,1 +1,0 @@
-docker stack deploy -c docker-cluster-local.yaml local-cluster
