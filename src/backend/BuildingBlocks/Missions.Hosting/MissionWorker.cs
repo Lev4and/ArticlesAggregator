@@ -7,14 +7,14 @@ namespace Missions.Hosting;
 public abstract class MissionWorker<TMission> : BackgroundService
     where TMission : IMission
 {
-    private readonly IMissionDelay _missionDelay;
+    private readonly IMissionDelay        _missionDelay;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     
     public MissionWorker(
-        IMissionDelay missionDelay, 
+        IMissionDelay        missionDelay, 
         IServiceScopeFactory serviceScopeFactory)
     {
-        _missionDelay = missionDelay;
+        _missionDelay        = missionDelay;
         _serviceScopeFactory = serviceScopeFactory;
     }
 
@@ -32,7 +32,7 @@ public abstract class MissionWorker<TMission> : BackgroundService
                 
                 await RunMissionAsync(mission, stoppingToken);
             }
-            catch (Exception exception)
+            catch
             {
                 
             }
