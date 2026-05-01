@@ -15,10 +15,4 @@
       <ProjectReference Include="..\..\..\BuildingBlocks\Result\Result.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Entities\" />
-      <Folder Include="Repositories\" />
-      <Folder Include="ValueObjects\" />
-    </ItemGroup>
-
 </Project>

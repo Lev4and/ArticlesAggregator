@@ -2,5 +2,5 @@
 
 public interface IMission
 {
-    Task RunAsync(CancellationToken cancellationToken = default);
+    Task RunAsync(CancellationToken ct = default);
 }

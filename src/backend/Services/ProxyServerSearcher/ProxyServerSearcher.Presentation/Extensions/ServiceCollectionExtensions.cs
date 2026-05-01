@@ -1,4 +1,6 @@
 ﻿using System.Threading.RateLimiting;
+using Database.EntityFramework.Configurations;
+using Database.EntityFramework.Extensions;
 using Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -86,7 +88,10 @@ public static class ServiceCollectionExtensions
         services.AddTransient<CorrelationLoggingMiddleware>();
         services
             .AddHealthChecks()
-            .AddNpgSql();
+            .AddNpgSql(
+                connectionStringFactory: provider =>
+                    provider.GetRequiredService<IPostgresDatabaseConfiguration>().GetConnectionString(),
+                tags: ["ready", "alive"]);
         services.AddEndpointsApiExplorer();
         services.AddOpenApi();
         services
@@ -135,7 +140,7 @@ public static class ServiceCollectionExtensions
                 options.IncludeXmlComments(
                     filePath: AppContext.BaseDirectory + "/ProxyServerSearcher.Application.xml", 
                     includeControllerXmlComments: true);
-                
+            
                 options.IncludeXmlComments(
                     filePath: AppContext.BaseDirectory + "/ProxyServerSearcher.Presentation.xml", 
                     includeControllerXmlComments: true);

@@ -12,6 +12,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\Server.Kestrel\Server.Kestrel.csproj" />
       <ProjectReference Include="..\ProxyServerSearcher.Application\ProxyServerSearcher.Application.csproj" />
+      <ProjectReference Include="..\ProxyServerSearcher.Persistence\ProxyServerSearcher.Persistence.csproj" />
     </ItemGroup>
 
     <ItemGroup>

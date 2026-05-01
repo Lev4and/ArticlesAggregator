@@ -23,18 +23,10 @@ public static class DbContextOptionsBuilderExtensions
 
         private DbContextOptionsBuilder UsePostgresDatabase(IServiceProvider provider)
         {
-            var configuration           = provider.GetRequiredService<IPostgresDatabaseConfiguration>();
-            var connectionStringBuilder = new NpgsqlConnectionStringBuilder
-            {
-                Host = configuration.Host,
-                Port = configuration.Port,
-                Database = configuration.Database,
-                Username = configuration.Username,
-                Password = configuration.Password,
-            };
+            var configuration = provider.GetRequiredService<IPostgresDatabaseConfiguration>();
             
             builder.UseNpgsql(
-                connectionStringBuilder.ConnectionString,
+                configuration.GetConnectionString(),
                 options =>
                 {
                     

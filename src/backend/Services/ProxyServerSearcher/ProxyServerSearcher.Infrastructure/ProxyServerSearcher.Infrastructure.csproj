@@ -18,6 +18,11 @@
         <PackageReference Include="AngleSharp" />
         <PackageReference Include="AngleSharp.XPath" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Http" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ProxyServers\" />
     </ItemGroup>
 
 </Project>

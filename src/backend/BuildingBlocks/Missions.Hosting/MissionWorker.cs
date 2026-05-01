@@ -41,8 +41,8 @@ public abstract class MissionWorker<TMission> : BackgroundService
         }
     }
 
-    protected virtual async Task RunMissionAsync(IMission mission, CancellationToken stoppingToken = default)
+    protected virtual async Task RunMissionAsync(IMission mission, CancellationToken ct = default)
     {
-        await mission.RunAsync(stoppingToken);
+        await mission.RunAsync(ct);
     }
 }
