@@ -15,42 +15,61 @@ public class PulsarConsumer : IMessageConsumer
     
     public PulsarConsumer(IPulsarClient client)
     {
-        var consumerBuilder = client.NewConsumer(Schema.String);
-        
-        _consumer = consumerBuilder.Create();
+        _consumer = client.NewConsumer(Schema.String).Create();
     }
     
     public async IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
-        while (!cancellationToken.IsCancellationRequested)
+        await foreach (var consumedMessage in _consumer.Messages(ct))
         {
-            await foreach (var consumedMessage in _consumer.Messages(cancellationToken))
+            if (!consumedMessage.Properties.TryGetValue(PulsarMessagePropertyConstants.Type, out var type))
             {
-                var messageType = consumedMessage.Properties[PulsarMessagePropertyConstants.Type];
-                var message = (IMessage)JsonConvert.DeserializeObject(consumedMessage.Value(), Type.GetType(messageType)!)!;
-                
-                yield return new PulsarConsumeMessageContext(consumedMessage.MessageId.ToString(), message, 
-                    consumedMessage.PublishTimeAsDateTime, DateTime.UtcNow);
+                await _consumer.Acknowledge(consumedMessage.MessageId, ct);
+                    
+                continue;
             }
+
+            var messageType = Type.GetType(type);
+            if (messageType is null)
+            {
+                await _consumer.Acknowledge(consumedMessage.MessageId, ct);
+                    
+                continue;
+            }
+
+            var message = (IMessage)JsonConvert.DeserializeObject(consumedMessage.Value(), messageType)!;
+                    
+            yield return new PulsarConsumeMessageContext
+            {
+                MessageId   = consumedMessage.MessageId.ToString(),
+                Data        = message,
+                PublishedAt = consumedMessage.PublishTimeAsDateTime,
+                ConsumedAt  = DateTime.UtcNow
+            };
         }
     }
 
-    public async Task AcknowledgeAsync(IConsumeMessageContext context, 
-        CancellationToken cancellationToken = default)
+    public async Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default)
     {
         if (MessageId.TryParse(context.MessageId, out var messageId))
         {
-            await _consumer.Acknowledge(messageId, cancellationToken);
+            await _consumer.Acknowledge(messageId, ct);
         } 
     }
 
-    public async Task NegativeAcknowledgeAsync(IConsumeMessageContext context, 
-        CancellationToken cancellationToken = default)
+    public async Task NegativeAcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default)
     {
         if (MessageId.TryParse(context.MessageId, out var messageId))
         {
-            await _consumer.RedeliverUnacknowledgedMessages([messageId], cancellationToken);
+            await _consumer.RedeliverUnacknowledgedMessages([messageId], ct);
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _consumer.DisposeAsync();
+        
+        GC.SuppressFinalize(this);
     }
 }

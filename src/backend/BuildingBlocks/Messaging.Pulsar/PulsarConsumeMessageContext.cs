@@ -2,5 +2,13 @@
 
 namespace Messaging.Pulsar;
 
-public record PulsarConsumeMessageContext(string MessageId, IMessage Data, DateTime PublishedAt, DateTime ConsumedAt) 
-    : IConsumeMessageContext;
+public record PulsarConsumeMessageContext : IConsumeMessageContext
+{
+    public string MessageId { get; init; } = null!;
+
+    public IMessage Data { get; init; } = null!;
+    
+    public DateTime PublishedAt { get; init; }
+    
+    public DateTime ConsumedAt { get; init; }
+}

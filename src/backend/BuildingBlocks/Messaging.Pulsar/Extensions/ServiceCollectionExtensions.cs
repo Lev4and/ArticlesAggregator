@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
         {
             var assembliesTypes = assemblies.GetTypes().ToArray();
             
-            services.AddSingleton(serviceProvider =>
+            services.AddScoped(serviceProvider =>
             {
                 var pulsarConfiguration = serviceProvider.GetRequiredService<IPulsarConfiguration>();
                 var pulsarClientBuilder = PulsarClient.Builder();
@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
 
             services.AddSingleton<PulsarProducerDictionary>();
 
-            services.AddSingleton<IDistributedMessageProducer, PulsarProducer>();
+            services.AddScoped<IDistributedMessageProducer, PulsarProducer>();
         
             assembliesTypes
                 .Where(type => type is { IsClass: true, IsAbstract: false } && 

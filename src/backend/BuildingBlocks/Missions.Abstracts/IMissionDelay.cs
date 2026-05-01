@@ -2,7 +2,7 @@
 
 public interface IMissionDelay
 {
-    Task StartDelayAsync(CancellationToken cancellationToken = default);
+    Task StartDelayAsync(CancellationToken ct = default);
     
-    Task IntervalDelayAsync(CancellationToken cancellationToken = default);
+    Task IntervalDelayAsync(CancellationToken ct = default);
 }

@@ -1,4 +1,5 @@
 ﻿using Amazon;
+using Amazon.Runtime;
 using Amazon.S3;
 using Microsoft.Extensions.DependencyInjection;
 using ObjectStorage.Abstracts;
@@ -33,13 +34,16 @@ public static class ServiceCollectionExtensions
                 
                 var s3Config = new AmazonS3Config
                 {
-                    
+                    ServiceURL            = configuration.Url.AbsoluteUri,
+                    DefaultAWSCredentials = new BasicAWSCredentials(configuration.AccessKey, configuration.SecretKey),
+                    ConnectTimeout        = TimeSpan.FromSeconds(30),
+                    ForcePathStyle        = true,
                 };
                 
                 return new AmazonS3Client(s3Config);
             });
             
-            services.AddSingleton<IObjectStorage, AmazonObjectStorage>();
+            services.AddScoped<IObjectStorage, AmazonObjectStorage>();
             
             return services;
         }

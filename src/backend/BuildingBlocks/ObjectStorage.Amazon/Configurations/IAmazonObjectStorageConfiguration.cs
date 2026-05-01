@@ -2,7 +2,11 @@
 
 public interface IAmazonObjectStorageConfiguration
 {
-    string Host { get; }
+    Uri Url { get; }
     
-    int Port { get; }
+    string AccessKey { get; }
+    
+    string SecretKey { get; }
+    
+    string BucketName { get; }
 }

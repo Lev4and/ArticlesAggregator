@@ -4,14 +4,18 @@ public class AmazonObjectStorageConfiguration : IAmazonObjectStorageConfiguratio
 {
     // ReSharper disable InconsistentNaming
     
-    private const string S3_HOST = nameof(S3_HOST);
-    private const string S3_PORT = nameof(S3_PORT);
+    private const string S3_URL = nameof(S3_URL);
+    private const string S3_ACCESS_KEY = nameof(S3_ACCESS_KEY);
+    private const string S3_SECRET_KEY = nameof(S3_SECRET_KEY);
+    private const string S3_BUCKET_NAME = nameof(S3_BUCKET_NAME);
     
     // ReSharper restore InconsistentNaming
     
-    public string Host => Environment.GetEnvironmentVariable(S3_HOST) 
-        ?? throw new ArgumentException($"{nameof(S3_HOST)} environment variable is not set.");
+    public Uri Url => new Uri(Environment.GetEnvironmentVariable(S3_URL) ?? "http://localhost:9000");
+
+    public string AccessKey => Environment.GetEnvironmentVariable(S3_ACCESS_KEY) ?? string.Empty;
     
-    public int Port => int.Parse(Environment.GetEnvironmentVariable(S3_PORT) 
-        ?? throw new ArgumentException($"{nameof(S3_PORT)} environment variable is not set."));
+    public string SecretKey => Environment.GetEnvironmentVariable(S3_SECRET_KEY) ?? string.Empty;
+    
+    public string BucketName => Environment.GetEnvironmentVariable(S3_BUCKET_NAME) ?? "default";
 }

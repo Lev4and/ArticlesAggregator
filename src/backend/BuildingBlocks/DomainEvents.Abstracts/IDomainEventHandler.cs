@@ -5,15 +5,15 @@ namespace DomainEvents.Abstracts;
 public interface IDomainEventHandler<TDomainEvent> : IDomainEventHandler
     where TDomainEvent : IDomainEvent
 {
-    Task<AppResult> HandleAsync(TDomainEvent domainEvent, CancellationToken cancellationToken = default);
+    Task<AppResult> HandleAsync(TDomainEvent domainEvent, CancellationToken ct = default);
 
-    Task<AppResult> IDomainEventHandler.HandleAsync(IDomainEvent domainEvent, CancellationToken cancellationToken)
+    Task<AppResult> IDomainEventHandler.HandleAsync(IDomainEvent domainEvent, CancellationToken ct)
     {
-        return HandleAsync((TDomainEvent)domainEvent, cancellationToken);
+        return HandleAsync((TDomainEvent)domainEvent, ct);
     }
 }
 
 public interface IDomainEventHandler
 {
-    Task<AppResult> HandleAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default);
+    Task<AppResult> HandleAsync(IDomainEvent domainEvent, CancellationToken ct = default);
 }

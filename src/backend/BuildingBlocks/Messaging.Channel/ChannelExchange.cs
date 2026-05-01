@@ -13,18 +13,23 @@ public class ChannelExchange
         _queueDictionary = queueDictionary;
     }
     
-    public async Task PublishAsync(IMessage message, CancellationToken cancellationToken = default)
+    public async Task PublishAsync(IMessage message, CancellationToken ct = default)
     {
-        var messageAttribute = message.GetType().GetCustomAttribute<MessageTopicAttribute>();
-        if (messageAttribute is null)
+        var messageTopicAttribute = message.GetType().GetCustomAttribute<MessageTopicAttribute>();
+        if (messageTopicAttribute is null)
         {
             return;
         }
         
-        var queue = _queueDictionary.GetOrAdd(messageAttribute.Topic, new ChannelQueue());
+        var queue = _queueDictionary.GetOrAdd(messageTopicAttribute.Topic, new ChannelQueue());
 
-        var messageContext = new ChannelMessageContext(Guid.NewGuid().ToString(), message, DateTime.UtcNow);
+        var messageContext = new ChannelMessageContext
+        {
+            MessageId   = Guid.NewGuid().ToString(),
+            Data        = message,
+            PublishedAt = DateTime.UtcNow
+        };
         
-        await queue.Writer.WriteAsync(messageContext, cancellationToken);
+        await queue.Writer.WriteAsync(messageContext, ct);
     }
 }

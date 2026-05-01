@@ -8,7 +8,5 @@ public class PulsarConfiguration : IPulsarConfiguration
     
     // ReSharper restore InconsistentNaming
 
-    
-    public Uri Url => new(Environment.GetEnvironmentVariable(PULSAR_URL) ?? 
-        throw new ArgumentException($"{nameof(PULSAR_URL)} environment variable is not set."));
+    public Uri Url => new(Environment.GetEnvironmentVariable(PULSAR_URL) ?? "pulsar://localhost:6650");
 }

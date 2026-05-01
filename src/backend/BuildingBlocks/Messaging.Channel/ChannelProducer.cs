@@ -11,9 +11,14 @@ public class ChannelProducer : IMessageProducer
         _exchange = exchange;
     }
     
-    public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default) 
+    public async Task PublishAsync<TMessage>(TMessage message, CancellationToken ct = default) 
         where TMessage : IMessage
     {
-        await _exchange.PublishAsync(message, cancellationToken);
+        await _exchange.PublishAsync(message, ct);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
     }
 }

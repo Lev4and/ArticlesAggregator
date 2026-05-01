@@ -7,6 +7,18 @@ public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        public IServiceCollection AddMission<TMission>(TimeSpan startDelay, TimeSpan intervalDelay)
+            where TMission : class, IMission
+        {
+            services.AddScoped<TMission>();
+
+            services.AddHostedService<MissionWorker<TMission>>(provider => 
+                ActivatorUtilities.CreateInstance<MissionWorker<TMission>>(provider, 
+                    new MissionDelay(startDelay, intervalDelay)));
+            
+            return services;
+        }
+        
         public IServiceCollection AddMission<TMission>(IMissionDelay missionDelay)
             where TMission : class, IMission
         {

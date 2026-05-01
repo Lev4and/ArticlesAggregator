@@ -1,10 +1,10 @@
 ﻿namespace Messaging.Abstracts;
 
-public interface IMessageConsumer
+public interface IMessageConsumer : IAsyncDisposable
 {
-    IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(CancellationToken ct = default);
     
-    Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken cancellationToken = default);
+    Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default);
     
-    Task NegativeAcknowledgeAsync(IConsumeMessageContext context, CancellationToken cancellationToken = default);
+    Task NegativeAcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default);
 }

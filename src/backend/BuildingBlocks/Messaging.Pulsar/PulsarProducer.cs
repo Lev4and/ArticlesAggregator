@@ -12,22 +12,20 @@ namespace Messaging.Pulsar;
 
 public class PulsarProducer : IDistributedMessageProducer
 {
-    private readonly IPulsarClient _client;
+    private readonly IPulsarClient            _client;
     private readonly PulsarProducerDictionary _producerDictionary;
     
-    public PulsarProducer(
-        IPulsarClient client, 
-        PulsarProducerDictionary producerDictionary)
+    public PulsarProducer(IPulsarClient client, PulsarProducerDictionary producerDictionary)
     {
-        _client = client;
+        _client             = client;
         _producerDictionary = producerDictionary;
     }
     
-    public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default) 
+    public async Task PublishAsync<TMessage>(TMessage message, CancellationToken ct = default) 
         where TMessage : IMessage
     {
         var messageTypeAttribute = message.GetType().GetCustomAttribute<MessageTypeAttribute>();
-        var messageType = messageTypeAttribute?.Type ?? typeof(TMessage).Name;
+        var messageType     = messageTypeAttribute?.Type ?? typeof(TMessage).Name;
         
         var messageTopicAttribute = message.GetType().GetCustomAttribute<MessageTopicAttribute>();
         if (messageTopicAttribute is null)
@@ -35,21 +33,20 @@ public class PulsarProducer : IDistributedMessageProducer
             return;
         }
 
-        if (!_producerDictionary.ContainsKey(messageTopicAttribute.Topic))
-        {
-            var producerBuilder = _client.NewProducer(Schema.String).Topic(messageTopicAttribute.Topic);
-            
-            _producerDictionary.TryAdd(messageTopicAttribute.Topic, producerBuilder.Create());
-        }
+        var producer = _producerDictionary.GetOrAdd(messageTopicAttribute.Topic,
+            topic => _client.NewProducer(Schema.String).Topic(topic).Create());
 
-        var producer = _producerDictionary[messageTopicAttribute.Topic];
-        
         var messageBody = JsonConvert.SerializeObject(message);
-
-        var messageBuilder = producer.NewMessage();
+        var messageBuilder   = producer.NewMessage()
+            .Property(PulsarMessagePropertyConstants.Type, messageType);
         
-        messageBuilder.Property(PulsarMessagePropertyConstants.Type, messageType);
+        await messageBuilder.Send(messageBody, ct);
+    }
 
-        await messageBuilder.Send(messageBody, cancellationToken);
+    public async ValueTask DisposeAsync()
+    {
+        await _client.DisposeAsync();
+        
+        GC.SuppressFinalize(this);
     }
 }

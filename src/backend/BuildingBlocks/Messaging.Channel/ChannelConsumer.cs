@@ -13,27 +13,37 @@ public class ChannelConsumer : IMessageConsumer
     }
     
     public async IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
-        while (!cancellationToken.IsCancellationRequested)
+        while (!ct.IsCancellationRequested)
         {
-            while (await _queue.Reader.WaitToReadAsync(cancellationToken))
+            while (await _queue.Reader.WaitToReadAsync(ct))
             {
-                var messageContext = await _queue.Reader.ReadAsync(cancellationToken);
+                var messageContext = await _queue.Reader.ReadAsync(ct);
                 
-                yield return new ChannelConsumeMessageContext(messageContext, DateTime.UtcNow);
+                yield return new ChannelConsumeMessageContext
+                {
+                    MessageId   = messageContext.MessageId,
+                    Data        = messageContext.Data,
+                    PublishedAt = messageContext.PublishedAt,
+                    ConsumedAt  = DateTime.UtcNow
+                };
             }
         }
     }
 
-    public Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken cancellationToken = default)
+    public async Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default)
     {
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
-    public async Task NegativeAcknowledgeAsync(IConsumeMessageContext context, 
-        CancellationToken cancellationToken = default)
+    public async Task NegativeAcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default)
     {
-        await _queue.Writer.WriteAsync(context, cancellationToken);
+        await _queue.Writer.WriteAsync(context, ct);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // TODO release managed resources here
     }
 }

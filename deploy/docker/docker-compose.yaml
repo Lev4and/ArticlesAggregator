@@ -160,7 +160,7 @@ services:
         delay: 10s
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    image: bitnamilegacy/minio:2025.4.8
     container_name: minio
     restart: always
     command: server --address "0.0.0.0:9000" --console-address "0.0.0.0:9001" /data
@@ -258,7 +258,7 @@ services:
         delay: 10s
   
   keycloak-postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
     container_name: keycloak-postgres-exporter
     restart: always
     healthcheck:
@@ -481,7 +481,7 @@ services:
         delay: 10s
   
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor@sha256:3de2bd5203120b866d74a9b283b2ffb8ec382fbf9dc321814700c6ea6f44ec57
     container_name: cadvisor
     restart: always
     healthcheck:
