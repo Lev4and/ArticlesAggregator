@@ -11,7 +11,7 @@ public class EntityFrameworkConfiguration : IEntityFrameworkConfiguration
     // ReSharper restore InconsistentNaming
     
     public DatabaseType DatabaseType => Enum.Parse<DatabaseType>(
-        Environment.GetEnvironmentVariable(DATABASE_TYPE) ?? "Postgres");
+        Environment.GetEnvironmentVariable(DATABASE_TYPE) ?? nameof(DatabaseType.Postgres));
 
     public bool EnableDetailedErrors => true;
     

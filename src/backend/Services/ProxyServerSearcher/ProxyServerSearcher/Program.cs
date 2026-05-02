@@ -19,7 +19,7 @@ var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
-app.MigrateDatabase<AppDbContext>();
+// app.MigrateDatabase<AppDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

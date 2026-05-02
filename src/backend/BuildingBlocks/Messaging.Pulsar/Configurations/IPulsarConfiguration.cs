@@ -3,4 +3,8 @@
 public interface IPulsarConfiguration
 {
     Uri Url { get; }
+    
+    bool UseTls { get; }
+    
+    string? AuthToken { get; }
 }

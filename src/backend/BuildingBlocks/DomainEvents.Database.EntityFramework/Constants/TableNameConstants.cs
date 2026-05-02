@@ -2,5 +2,5 @@
 
 public class TableNameConstants
 {
-    public const string DomainEvents = nameof(DomainEvents);
+    public const string DomainEvents = "domain_events";
 }

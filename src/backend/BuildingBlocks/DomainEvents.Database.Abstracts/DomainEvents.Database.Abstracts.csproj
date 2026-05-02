@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Database.Abstracts\Database.Abstracts.csproj" />
       <ProjectReference Include="..\DomainEvents.Abstracts\DomainEvents.Abstracts.csproj" />
+      <ProjectReference Include="..\StoredTasks.Database.Abstracts\StoredTasks.Database.Abstracts.csproj" />
     </ItemGroup>
 
 </Project>

@@ -9,8 +9,20 @@ public abstract class StoredTaskEntityConfiguration<TStoredTask> : IEntityTypeCo
 {
     protected abstract string TableName { get; }
     
-    public void Configure(EntityTypeBuilder<TStoredTask> builder)
+    public virtual void Configure(EntityTypeBuilder<TStoredTask> builder)
     {
-        throw new NotImplementedException();
+        builder.ToTable(TableName);
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.State).HasConversion<string>();
+        builder.HasIndex(e => e.State);
+        builder.HasIndex(e => e.CreatedAt);
+        builder.HasIndex(e => e.UpdatedAt);
+        builder.HasIndex(e => e.WorkerId);
+        builder.HasIndex(e => e.AttemptDeadline);
+        builder.HasIndex(e => e.Deadline);
+        builder.HasIndex(e => e.AttemptsRemaining);
+        builder.HasIndex(e => e.Attempts);
+        builder.HasIndex(e => e.State);
+        builder.HasIndex(e => new { e.State, e.AttemptDeadline, e.AttemptsRemaining, e.Deadline });
     }
 }

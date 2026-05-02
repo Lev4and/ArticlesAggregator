@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
 using Observability.Abstracts;
 
 namespace Observability.OpenTelemetry;

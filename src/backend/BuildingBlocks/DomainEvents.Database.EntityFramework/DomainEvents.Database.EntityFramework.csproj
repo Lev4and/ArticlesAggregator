@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Database.EntityFramework\Database.EntityFramework.csproj" />
       <ProjectReference Include="..\DomainEvents.Database.Abstracts\DomainEvents.Database.Abstracts.csproj" />
+      <ProjectReference Include="..\StoredTasks.Database.EntityFramework\StoredTasks.Database.EntityFramework.csproj" />
     </ItemGroup>
 
 </Project>

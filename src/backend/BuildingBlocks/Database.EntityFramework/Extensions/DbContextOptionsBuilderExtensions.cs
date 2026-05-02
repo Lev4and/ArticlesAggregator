@@ -4,8 +4,6 @@ using Database.EntityFramework.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using Npgsql;
-
 namespace Database.EntityFramework.Extensions;
 
 public static class DbContextOptionsBuilderExtensions

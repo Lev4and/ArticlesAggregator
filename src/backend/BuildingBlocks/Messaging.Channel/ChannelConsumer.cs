@@ -15,20 +15,17 @@ public class ChannelConsumer : IMessageConsumer
     public async IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        while (!ct.IsCancellationRequested)
+        while (await _queue.Reader.WaitToReadAsync(ct))
         {
-            while (await _queue.Reader.WaitToReadAsync(ct))
-            {
-                var messageContext = await _queue.Reader.ReadAsync(ct);
+            var messageContext = await _queue.Reader.ReadAsync(ct);
                 
-                yield return new ChannelConsumeMessageContext
-                {
-                    MessageId   = messageContext.MessageId,
-                    Data        = messageContext.Data,
-                    PublishedAt = messageContext.PublishedAt,
-                    ConsumedAt  = DateTime.UtcNow
-                };
-            }
+            yield return new ChannelConsumeMessageContext
+            {
+                MessageId   = messageContext.MessageId,
+                Data        = messageContext.Data,
+                PublishedAt = messageContext.PublishedAt,
+                ConsumedAt  = DateTime.UtcNow
+            };
         }
     }
 

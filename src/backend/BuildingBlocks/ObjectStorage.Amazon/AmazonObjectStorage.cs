@@ -3,7 +3,6 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using ObjectStorage.Abstracts;
 using ObjectStorage.Abstracts.Models;
-using ObjectStorage.Amazon.Configurations;
 using Result;
 using DeleteObjectRequest = ObjectStorage.Abstracts.Models.DeleteObjectRequest;
 using GetObjectRequest = ObjectStorage.Abstracts.Models.GetObjectRequest;

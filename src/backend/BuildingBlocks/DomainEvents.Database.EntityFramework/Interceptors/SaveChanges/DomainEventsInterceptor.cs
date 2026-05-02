@@ -16,7 +16,13 @@ public class DomainEventsInterceptor : SaveChangesInterceptor
         }
 
         var domainEvents = dbContext.ChangeTracker.Entries<IHasDomainEvents>()
-            .SelectMany(entry => entry.Entity.GetDomainEvents().Select(DomainEvent.Create));
+            .SelectMany(entry => entry.Entity.GetDomainEvents()
+                .Select(@event => new DomainEvent
+                {
+                    Id      = Guid.NewGuid(),
+                    Type    = @event.GetType().Name,
+                    Content = JsonSerializer.SerializeToDocument(@event),
+                }));
         
         dbContext.Set<DomainEvent>().AddRange(domainEvents);
         

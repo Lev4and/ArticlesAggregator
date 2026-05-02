@@ -1,6 +1,6 @@
 ﻿namespace Database.Abstracts;
 
-public interface IUnitOfWork
+public interface IUnitOfWork : IAsyncDisposable, IDisposable
 {
     Task<IDatabaseTransaction> BeginTransactionAsync(CancellationToken ct = default);
     

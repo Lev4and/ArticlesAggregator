@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using AngleSharp.Html.Parser;
 using AngleSharp.XPath;
-using Microsoft.Extensions.Logging;
 using ProxyServerSearcher.Application.Abstracts.ProxyServers;
 using ProxyServerSearcher.Application.Dtos.ProxyServers;
 using ProxyServerSearcher.Domain.Enums;

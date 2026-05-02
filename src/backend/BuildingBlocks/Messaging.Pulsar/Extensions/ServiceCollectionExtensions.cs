@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using DotPulsar;
+using DotPulsar.Internal;
 using Extensions;
 using Messaging.Abstracts;
 using Messaging.Abstracts.Distributed;
@@ -38,6 +39,16 @@ public static class ServiceCollectionExtensions
                 var pulsarClientBuilder = PulsarClient.Builder();
 
                 pulsarClientBuilder.ServiceUrl(pulsarConfiguration.Url);
+
+                if (pulsarConfiguration.UseTls)
+                {
+                    pulsarClientBuilder.ConnectionSecurity(EncryptionPolicy.PreferEncrypted);
+                }
+
+                if (!string.IsNullOrEmpty(pulsarConfiguration.AuthToken))
+                {
+                    pulsarClientBuilder.Authentication(new TokenAuthentication(pulsarConfiguration.AuthToken));
+                }
 
                 return pulsarClientBuilder.Build();
             });
