@@ -42,7 +42,7 @@ public static class WebApplicationBuilderExtensions
             builder.Services.AddOpenTelemetry()
                 .ConfigureResource(resourceBuilder =>
                 {
-                    resourceBuilder.AddService(serviceName);
+                    resourceBuilder.AddService(serviceName, serviceVersion: version);
                 })
                 .WithLogging(loggerProviderBuilder =>
                 {
@@ -54,12 +54,15 @@ public static class WebApplicationBuilderExtensions
                 })
                 .WithTracing(tracerProviderBuilder =>
                 {
+                    tracerProviderBuilder.AddSource(serviceName);
+                    
                     tracerProviderBuilder.AddAspNetCoreInstrumentation();
                     tracerProviderBuilder.AddEntityFrameworkCoreInstrumentation();
                     tracerProviderBuilder.AddSqlClientInstrumentation();
                     tracerProviderBuilder.AddRedisInstrumentation();
                     tracerProviderBuilder.AddHttpClientInstrumentation();
                     tracerProviderBuilder.AddGrpcClientInstrumentation();
+                    
                     tracerProviderBuilder.AddOtlpExporter(options =>
                     {
                         options.Protocol = OtlpExportProtocol.Grpc;
@@ -68,12 +71,15 @@ public static class WebApplicationBuilderExtensions
                 })
                 .WithMetrics(meterProviderBuilder =>
                 {
+                    meterProviderBuilder.AddMeter(serviceName);
+                    
                     meterProviderBuilder.AddAspNetCoreInstrumentation();
                     meterProviderBuilder.AddEventCountersInstrumentation();
                     meterProviderBuilder.AddRuntimeInstrumentation();
                     meterProviderBuilder.AddProcessInstrumentation();
                     meterProviderBuilder.AddHttpClientInstrumentation();
                     meterProviderBuilder.AddSqlClientInstrumentation();
+                    
                     meterProviderBuilder.AddOtlpExporter(options =>
                     {
                         options.Protocol = OtlpExportProtocol.Grpc;

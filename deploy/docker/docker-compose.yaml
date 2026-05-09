@@ -285,6 +285,63 @@ services:
         failure_action: rollback
         delay: 10s
   
+  proxy-server-searcher-postgres:
+    image: postgres:18.3
+    container_name: proxy-server-searcher-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: proxy-server-searcher
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/proxy-server-searcher-postgres/data:/var/lib/postgresql/18/docker
+    ports:
+      - "20002:5432"
+    networks:
+      - proxy-server-searcher-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  proxy-server-searcher-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
+    container_name: proxy-server-searcher-postgres-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - proxy-server-searcher-postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@proxy-server-searcher-postgres:5432/keycloak?sslmode=disable"
+    expose:
+      - "9187"
+    networks:
+      - proxy-server-searcher-postgres-exporter-network
+      - proxy-server-searcher-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
   opentelemetry-collector-agent:
     image: otel/opentelemetry-collector-contrib:0.147.0-nightly.6d94db7
     container_name: opentelemetry-collector-agent
@@ -610,6 +667,10 @@ networks:
   keycloak-postgres-network:
     driver: overlay
   keycloak-postgres-exporter-network:
+    driver: overlay
+  proxy-server-searcher-postgres-network:
+    driver: overlay
+  proxy-server-searcher-postgres-exporter-network:
     driver: overlay
   selenium-hub-network:
     driver: overlay

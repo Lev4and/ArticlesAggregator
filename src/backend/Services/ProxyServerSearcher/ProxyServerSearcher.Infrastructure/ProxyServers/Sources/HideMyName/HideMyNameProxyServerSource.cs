@@ -2,32 +2,48 @@
 using System.Text.RegularExpressions;
 using AngleSharp.Html.Parser;
 using AngleSharp.XPath;
+using Microsoft.Extensions.Logging;
+using Observability.Abstracts;
 using ProxyServerSearcher.Application.Abstracts.ProxyServers;
 using ProxyServerSearcher.Application.Dtos.ProxyServers;
 using ProxyServerSearcher.Domain.Enums;
+using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources.HideMyName;
 
 public class HideMyNameProxyServerSource : IProxyServerSource
 {
+    private readonly ITracer<HideMyNameProxyServerSource> _tracer;
+    private readonly ILogger<HideMyNameProxyServerSource> _logger;
     private readonly HideMyNameClient _client;
     private readonly HtmlParser       _htmlParser = new();
 
-    public HideMyNameProxyServerSource(HideMyNameClient client)
+    public HideMyNameProxyServerSource(
+        ITracer<HideMyNameProxyServerSource> tracer,
+        ILogger<HideMyNameProxyServerSource> logger,
+        HideMyNameClient client)
     {
+        _tracer = tracer;
+        _logger = logger;
         _client = client;
     }
     
     public async IAsyncEnumerable<IReadOnlyCollection<ProxyServerDto>> ProvideAsync( 
         [EnumeratorCancellation] CancellationToken ct = default)
     {
+        using var operation =
+            _tracer.StartOperation($"Provide proxy servers ({ProxyServerSourceConstants.HideMyName})");
+        
+        _logger.LogInformation("Provide proxy servers Source: {ProxyServersSource}", 
+            ProxyServerSourceConstants.HideMyName);
+        
         var offest = 0;
         var hasNextPage = false;
         
         do
         {
-            var htmlPageContent  = await _client.GetProxyListHtmlPageAsync(offest, ct: ct);
-            using var htmlDocument    = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
+            var htmlPageContent = await _client.GetProxyListHtmlPageAsync(offest, ct: ct);
+            using var htmlDocument = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
             var htmlDocumentNavigator = htmlDocument.CreateNavigator();
 
             var nextPageLink = 

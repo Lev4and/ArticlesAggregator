@@ -12,16 +12,9 @@ public class Tracer<T> : ITracer<T>
         _instrumentation = instrumentation;
     }
     
-    public Activity StartOperation(string name, Dictionary<string, object?>? tags = null, 
+    public Activity? StartOperation(string name, Dictionary<string, object?>? tags = null, 
         ActivityKind kind = ActivityKind.Internal)
     {
-        return _instrumentation.ActivitySource.StartActivity(name: name, kind: kind, tags: tags?.ToList())!;
-    }
-
-    public void Dispose()
-    {
-        _instrumentation.Dispose();
-        
-        GC.SuppressFinalize(this);
+        return _instrumentation.ActivitySource.StartActivity(name: name, kind: kind, tags: tags?.ToList());
     }
 }

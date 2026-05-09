@@ -1,7 +1,4 @@
 ﻿using System.Text.Json;
-using Contracts;
-using DomainEvents.Abstracts;
-using Primitives;
 using StoredTasks.Database.Abstracts;
 
 namespace DomainEvents.Database.Abstracts;

@@ -12,7 +12,7 @@ public class Instrumentation : IInstrumentation
 
     public Instrumentation(string name, string version = "1.0.0", Dictionary<string, object?>? tags = null)
     {
-        ActivitySource = new ActivitySource(name, version, tags);
+        ActivitySource = new ActivitySource(name, version: version, tags: tags);
         Meter = new Meter(name, version);
     }
     

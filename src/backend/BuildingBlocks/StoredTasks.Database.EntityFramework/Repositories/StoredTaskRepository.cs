@@ -22,7 +22,7 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
         
     }
 
-    public async Task<int> MarkExpiredTasksAsFailedAsync(CancellationToken ct = default)
+    public virtual async Task<int> MarkExpiredTasksAsFailedAsync(CancellationToken ct = default)
     {
         using var operation = Tracer.StartOperation("Mark expired stored tasks as failed in db");
         
@@ -38,7 +38,7 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
                 ct);
     }
 
-    public async Task<int> CaptureTasksAsync(string workerId, DateTime attemptDeadline, 
+    public virtual async Task<int> CaptureTasksAsync(string workerId, DateTime attemptDeadline, 
         int limit = 10, CancellationToken ct = default)
     {
         using var operation = Tracer.StartOperation("Capture stored tasks in db");
@@ -62,7 +62,7 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
                 ct);
     }
 
-    public async Task<IReadOnlyCollection<TStoredTask>> GetCapturedTasksAsync(string workerId,
+    public virtual async Task<IReadOnlyCollection<TStoredTask>> GetCapturedTasksAsync(string workerId,
         int limit = 10, CancellationToken ct = default)
     {
         using var operation = Tracer.StartOperation("Get captured stored tasks from db");
@@ -75,7 +75,7 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
                     .ToListAsync(ct);
     }
 
-    public async Task MarkTaskAsCompletedAsync(Guid taskId, CancellationToken ct = default)
+    public virtual async Task MarkTaskAsCompletedAsync(Guid taskId, CancellationToken ct = default)
     {
         using var operation = Tracer.StartOperation("Mark stored task as completed in db");
         
@@ -90,7 +90,7 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
                 ct);
     }
 
-    public async Task MarkTaskAsFailedAsync(Guid taskId, CancellationToken ct = default)
+    public virtual async Task MarkTaskAsFailedAsync(Guid taskId, CancellationToken ct = default)
     {
         using var operation = Tracer.StartOperation("Mark stored task as failed in db");
         

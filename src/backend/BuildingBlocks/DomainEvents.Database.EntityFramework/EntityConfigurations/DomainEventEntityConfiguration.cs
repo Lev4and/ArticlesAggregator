@@ -1,6 +1,5 @@
 ﻿using DomainEvents.Database.Abstracts;
 using DomainEvents.Database.EntityFramework.Constants;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StoredTasks.Database.EntityFramework.EntityConfigurations;
 

@@ -1,18 +1,32 @@
-﻿using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
+﻿using Microsoft.Extensions.Logging;
+using Observability.Abstracts;
+using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources.ProxyVerity;
 
 public class ProxyVerityClient : IDisposable
 {
+    private readonly ITracer<ProxyVerityClient> _tracer;
+    private readonly ILogger<ProxyVerityClient> _logger;
     private readonly HttpClient _httpClient;
     
-    public ProxyVerityClient(IHttpClientFactory httpClientFactory)
+    public ProxyVerityClient(
+        ITracer<ProxyVerityClient> tracer,
+        ILogger<ProxyVerityClient> logger,
+        IHttpClientFactory httpClientFactory)
     {
+        _tracer = tracer;
+        _logger = logger;
         _httpClient = httpClientFactory.CreateClient(ProxyServerSourceConstants.ProxyVerity);
     }
     
     public async Task<Stream> GetFreeProxyListHtmlPageAsync(int page = 1, CancellationToken ct = default)
     {
+        using var operation =
+            _tracer.StartOperation($"Get proxy server list html page ({ProxyServerSourceConstants.ProxyVerity})");
+        
+        _logger.LogInformation($"Get proxy server list html page ({ProxyServerSourceConstants.ProxyVerity})");
+        
         var httpRequestMessage = new HttpRequestMessage
         {
             Method     = HttpMethod.Get,

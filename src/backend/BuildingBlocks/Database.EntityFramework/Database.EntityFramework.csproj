@@ -7,9 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Database.Abstracts\Database.Abstracts.csproj" />
-      <ProjectReference Include="..\Extensions\Extensions.csproj" />
-      <ProjectReference Include="..\Observability.Abstracts\Observability.Abstracts.csproj" />
+        <ProjectReference Include="..\Database.Abstracts\Database.Abstracts.csproj" />
+        <ProjectReference Include="..\Extensions\Extensions.csproj" />
+        <ProjectReference Include="..\Observability.Abstracts\Observability.Abstracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

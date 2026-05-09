@@ -3,7 +3,6 @@ using DomainEvents.Abstracts;
 using Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using StoredTasks.Abstracts;
 
 namespace DomainEvents.Database.EntityFramework.Extensions;
 

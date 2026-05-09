@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Observability.Abstracts;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Sources.Geonode.Models.Api;
 
@@ -6,16 +8,27 @@ namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources.Geonode;
 
 public class GeonodeClient : IDisposable
 {
+    private readonly ITracer<GeonodeClient> _tracer;
+    private readonly ILogger<GeonodeClient> _logger;
     private readonly HttpClient _httpClient;
 
-    public GeonodeClient(IHttpClientFactory httpClientFactory)
+    public GeonodeClient(
+        ITracer<GeonodeClient> tracer,
+        ILogger<GeonodeClient> logger,
+        IHttpClientFactory httpClientFactory)
     {
+        _tracer = tracer;
+        _logger = logger;
         _httpClient = httpClientFactory.CreateClient(ProxyServerSourceConstants.Geonode);
     }
 
     public async Task<ApiPagedResult<ApiProxyServer>> GetProxyServerListAsync(int page = 1,
         CancellationToken cancellationToken = default)
     {
+        using var operation = _tracer.StartOperation($"Get proxy server list ({ProxyServerSourceConstants.Geonode})");
+        
+        _logger.LogInformation($"Get proxy server list ({ProxyServerSourceConstants.Geonode})");
+        
         var httpClientRequest = new HttpRequestMessage
         {
             Method     = HttpMethod.Get,

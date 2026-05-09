@@ -1,5 +1,4 @@
-﻿using Database.EntityFramework;
-using Database.EntityFramework.Repositories;
+﻿using Database.EntityFramework.Repositories;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using Primitives;

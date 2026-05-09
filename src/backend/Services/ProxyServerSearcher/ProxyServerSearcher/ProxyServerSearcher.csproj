@@ -26,4 +26,8 @@
       <ProjectReference Include="..\ProxyServerSearcher.Presentation\ProxyServerSearcher.Presentation.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+    </ItemGroup>
+
 </Project>
