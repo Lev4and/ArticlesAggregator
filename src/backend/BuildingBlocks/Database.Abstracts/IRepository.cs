@@ -2,7 +2,7 @@
 
 namespace Database.Abstracts;
 
-public interface IRepository<TEntity, TKey>
+public interface IRepository<TEntity, TKey> : IAsyncDisposable, IDisposable
     where TEntity : EntityBase<TKey> 
     where TKey : notnull
 {

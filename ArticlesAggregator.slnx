@@ -39,6 +39,7 @@
     <Project Path="src/backend/BuildingBlocks/StoredTasks.Abstracts/StoredTasks.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/StoredTasks.Database.Abstracts/StoredTasks.Database.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/StoredTasks.Database.EntityFramework/StoredTasks.Database.EntityFramework.csproj" />
+    <Project Path="src/backend/BuildingBlocks/StoredTasks.Database.Missions/StoredTasks.Database.Missions.csproj" />
   </Folder>
   <Folder Name="/src/backend/Services/" />
   <Folder Name="/src/backend/Services/ProxyServerSearcher/">

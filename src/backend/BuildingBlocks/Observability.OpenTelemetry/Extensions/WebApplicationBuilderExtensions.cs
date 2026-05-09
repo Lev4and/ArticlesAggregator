@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Observability.Abstracts;
 using Observability.OpenTelemetry.Configurations;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -15,8 +16,8 @@ public static class WebApplicationBuilderExtensions
 {
     extension(WebApplicationBuilder builder)
     {
-        public WebApplicationBuilder AddObservabilityOpenTelemetry(string serviceName, 
-            IOpenTelemetryConfiguration? openTelemetryConfiguration = null)
+        public WebApplicationBuilder AddObservabilityOpenTelemetry(string serviceName, string version = "1.0.0", 
+            Dictionary<string, object?>? tags = null, IOpenTelemetryConfiguration? openTelemetryConfiguration = null)
         {
             openTelemetryConfiguration ??= new OpenTelemetryConfiguration();
             
@@ -79,6 +80,11 @@ public static class WebApplicationBuilderExtensions
                         options.Endpoint = configuration.OpenTelemetryCollectorGrpcUrl;
                     });
                 });
+
+            builder.Services.AddSingleton<IInstrumentation, Instrumentation>(_ =>
+                new Instrumentation(serviceName, version, tags));
+            
+            builder.Services.AddScoped(typeof(ITracer<>), typeof(Tracer<>));
         
             return builder;
         }

@@ -13,6 +13,7 @@
       <ProjectReference Include="..\..\..\BuildingBlocks\Database.Abstracts\Database.Abstracts.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Extensions\Extensions.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Result\Result.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\StoredTasks.Database.Abstracts\StoredTasks.Database.Abstracts.csproj" />
     </ItemGroup>
 
 </Project>

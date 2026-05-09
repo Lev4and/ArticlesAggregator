@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Caching.Abstracts\Caching.Abstracts.csproj" />
+      <ProjectReference Include="..\Observability.Abstracts\Observability.Abstracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

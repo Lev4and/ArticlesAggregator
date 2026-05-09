@@ -1,6 +1,8 @@
 ﻿using Database.EntityFramework;
 using Database.EntityFramework.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Observability.Abstracts;
 using StoredTasks.Abstracts;
 using StoredTasks.Database.Abstracts;
 using EntityState = Primitives.EntityState;
@@ -11,13 +13,21 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
     EntityFrameworkRepository<TDbContext, TStoredTask, Guid>, IStoredTaskRepository<TStoredTask>
     where TDbContext : BaseDbContext where TStoredTask : StoredTask
 {
-    protected StoredTaskRepository(TDbContext dbContext) : base(dbContext)
+    protected StoredTaskRepository(
+        ITracer<EntityFrameworkRepository<TDbContext, TStoredTask, Guid>> tracer, 
+        ILogger<EntityFrameworkRepository<TDbContext, TStoredTask, Guid>> logger, 
+        TDbContext dbContext) : 
+        base(tracer, logger, dbContext)
     {
         
     }
-    
+
     public async Task<int> MarkExpiredTasksAsFailedAsync(CancellationToken ct = default)
     {
+        using var operation = Tracer.StartOperation("Mark expired stored tasks as failed in db");
+        
+        Logger.LogInformation("Marked expired stored tasks as failed in db");
+        
         return await DbContext.Set<TStoredTask>()
             .Where(task => task.State == StoredTaskState.Processing && task.AttemptDeadline < DateTime.UtcNow &&
                 (task.Deadline < DateTime.UtcNow || task.AttemptsRemaining == 1))
@@ -31,6 +41,10 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
     public async Task<int> CaptureTasksAsync(string workerId, DateTime attemptDeadline, 
         int limit = 10, CancellationToken ct = default)
     {
+        using var operation = Tracer.StartOperation("Capture stored tasks in db");
+        
+        Logger.LogInformation("Captured stored tasks in db");
+        
         return await DbContext.Set<TStoredTask>()
             .Where(task => task.State == StoredTaskState.Created || 
                 (task.State == StoredTaskState.Processing && task.AttemptDeadline < DateTime.UtcNow && 
@@ -51,6 +65,10 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
     public async Task<IReadOnlyCollection<TStoredTask>> GetCapturedTasksAsync(string workerId,
         int limit = 10, CancellationToken ct = default)
     {
+        using var operation = Tracer.StartOperation("Get captured stored tasks from db");
+        
+        Logger.LogInformation("Get captured stored tasks from db");
+        
         return await DbContext.Set<TStoredTask>().AsNoTracking()
             .Where(task => task.State == StoredTaskState.Processing && task.WorkerId == workerId)
                 .Take(limit)
@@ -59,6 +77,10 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
 
     public async Task MarkTaskAsCompletedAsync(Guid taskId, CancellationToken ct = default)
     {
+        using var operation = Tracer.StartOperation("Mark stored task as completed in db");
+        
+        Logger.LogInformation("Mark stored task as completed in db Id: {StoredTaskId}", taskId);
+        
         await DbContext.Set<TStoredTask>().AsNoTracking()
             .Where(task => task.Id == taskId)
             .ExecuteUpdateAsync(
@@ -70,6 +92,10 @@ public abstract class StoredTaskRepository<TDbContext, TStoredTask> :
 
     public async Task MarkTaskAsFailedAsync(Guid taskId, CancellationToken ct = default)
     {
+        using var operation = Tracer.StartOperation("Mark stored task as failed in db");
+        
+        Logger.LogInformation("Mark stored task as failed in db Id: {StoredTaskId}", taskId);
+        
         await DbContext.Set<TStoredTask>().AsNoTracking()
             .Where(task => task.Id == taskId)
             .ExecuteUpdateAsync(

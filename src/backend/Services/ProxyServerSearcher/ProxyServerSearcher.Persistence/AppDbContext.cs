@@ -1,16 +1,25 @@
 ﻿using Database.EntityFramework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Observability.Abstracts;
 
 namespace ProxyServerSearcher.Persistence;
 
 public class AppDbContext : BaseDbContext
 {
-    public AppDbContext()
+    public AppDbContext(
+        ITracer<BaseDbContext> tracer, 
+        ILogger<BaseDbContext> logger) : 
+        base(tracer, logger)
     {
         
     }
 
-    public AppDbContext(DbContextOptions options) : base(options)
+    public AppDbContext(
+        ITracer<BaseDbContext> tracer, 
+        ILogger<BaseDbContext> logger,
+        DbContextOptions options) : 
+        base(tracer, logger, options)
     {
         
     }

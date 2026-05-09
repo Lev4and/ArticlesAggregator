@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\Database.EntityFramework\Database.EntityFramework.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\StoredTasks.Database.EntityFramework\StoredTasks.Database.EntityFramework.csproj" />
       <ProjectReference Include="..\ProxyServerSearcher.Domain\ProxyServerSearcher.Domain.csproj" />
     </ItemGroup>
 

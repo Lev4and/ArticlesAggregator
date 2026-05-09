@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ObjectStorage.Abstracts\ObjectStorage.Abstracts.csproj" />
+      <ProjectReference Include="..\Observability.Abstracts\Observability.Abstracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>

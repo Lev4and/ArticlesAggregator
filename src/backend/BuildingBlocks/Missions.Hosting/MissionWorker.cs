@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Missions.Abstracts;
+using Observability.Abstracts;
 
 namespace Missions.Hosting;
 
@@ -10,35 +12,52 @@ public abstract class MissionWorker<TMission> : BackgroundService
     private readonly IMissionDelay        _missionDelay;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     
+    protected readonly ITracer<MissionWorker<TMission>> Tracer;
+    protected readonly ILogger<MissionWorker<TMission>> Logger;
+
     public MissionWorker(
-        IMissionDelay        missionDelay, 
-        IServiceScopeFactory serviceScopeFactory)
+        IMissionDelay missionDelay, 
+        IServiceScopeFactory serviceScopeFactory,
+        ITracer<MissionWorker<TMission>> tracer,
+        ILogger<MissionWorker<TMission>> logger)
     {
         _missionDelay        = missionDelay;
         _serviceScopeFactory = serviceScopeFactory;
+        
+        Tracer = tracer;
+        Logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        Logger.LogInformation("Mission worker started Type: {MissionType}", typeof(TMission).Name);
+        
         await _missionDelay.StartDelayAsync(stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await using var scope = _serviceScopeFactory.CreateAsyncScope();
-                
-                var mission = (IMission)scope.ServiceProvider.GetRequiredService(typeof(TMission));
+                await using var scope   = _serviceScopeFactory.CreateAsyncScope();
+                await using var mission = (IMission?)scope.ServiceProvider.GetService(typeof(TMission));
+                if (mission is null)
+                {
+                    Logger.LogError("Mission not found");
+                    
+                    break;
+                }
                 
                 await RunMissionAsync(mission, stoppingToken);
             }
-            catch
+            catch (Exception exception)
             {
-                
+                Logger.LogError(exception, "Mission execution failed");
             }
             
             await _missionDelay.IntervalDelayAsync(stoppingToken);
         }
+        
+        Logger.LogInformation("Mission worker stopped Type: {MissionType}", typeof(TMission).Name);
     }
 
     protected virtual async Task RunMissionAsync(IMission mission, CancellationToken ct = default)

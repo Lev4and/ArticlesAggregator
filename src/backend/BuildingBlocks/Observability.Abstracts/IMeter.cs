@@ -2,7 +2,7 @@
 
 namespace Observability.Abstracts;
 
-public interface IMeter
+public interface IMeter : IDisposable
 {
     Meter Meter { get; }
 }

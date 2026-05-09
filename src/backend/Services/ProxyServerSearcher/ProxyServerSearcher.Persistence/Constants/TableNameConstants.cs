@@ -3,4 +3,5 @@
 public class TableNameConstants
 {
     public const string ProxyServers = "proxy_servers";
+    public const string ProxyServerSearchStoredTasks = "proxy_server_search_stored_tasks";
 }
