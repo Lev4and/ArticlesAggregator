@@ -1,69 +1,71 @@
 ﻿using Messaging.Abstracts;
+using Messaging.Channel.Configuration;
+using Messaging.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Observability.Abstracts;
 
 namespace Messaging.Channel;
 
-public abstract class ChannelConsumerWorker : BackgroundService
+public class ChannelConsumerWorker : ConsumerWorker
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ChannelQueueDictionary        _queueDictionary;
+    private readonly IChannelConsumerConfiguration _configuration;
 
-    protected abstract string Topic { get; }
-
-    protected virtual int ConsumerCount => 1;
-
-    protected ChannelConsumerWorker(IServiceProvider serviceProvider)
+    public ChannelConsumerWorker(
+        ITracer<ConsumerWorker>       tracer, 
+        ILogger<ConsumerWorker>       logger, 
+        IServiceProvider              serviceProvider, 
+        ChannelQueueDictionary        queueDictionary, 
+        IChannelConsumerConfiguration configuration) : 
+        base(tracer, logger, serviceProvider)
     {
-        _serviceProvider = serviceProvider;
+        _queueDictionary = queueDictionary;
+        _configuration   = configuration;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public virtual async Task RunAsync(CancellationToken ct = default)
     {
-        var scope = _serviceProvider.CreateScope();
-
-        var queueDict = scope.ServiceProvider.GetRequiredService<ChannelQueueDictionary>();
-        var consumers = Enumerable.Range(1, ConsumerCount)
+        Logger.LogInformation("Channel consumer worker started");
+        
+        var consumerTasks = Enumerable.Range(1, _configuration.Count)
             .Select(_ =>
             {
-                var queue = queueDict.GetOrAdd(Topic, new ChannelQueue());
+                var tracer = ServiceProvider.GetRequiredService<ITracer<ChannelConsumer>>();
+                var logger = ServiceProvider.GetRequiredService<ILogger<ChannelConsumer>>();
                 
-                return new ChannelConsumer(queue);
+                var queue  = _queueDictionary.GetOrAdd(_configuration.Topic, new ChannelQueue());
+                
+                return new ChannelConsumer(tracer, logger, queue);
             })
             .Select(async consumer =>
             {
-                await foreach (var messageConsumedContext in consumer.ReceiveAsync(stoppingToken))
-                {
-                    var message = messageConsumedContext.Data;
-                    
-                    try
-                    {
-                        var messageHandlerType = typeof(IMessageHandler<>).MakeGenericType(message.GetType());
-                        
-                        var messageHandler = scope.ServiceProvider.GetService(messageHandlerType);
-                        if (messageHandler is null)
-                        {
-                            continue;
-                        }
-                        
-                        var messageHandleResult = await ((IMessageHandler)messageHandler)
-                            .HandleAsync(message, stoppingToken);
-                        if (messageHandleResult.IsSuccess)
-                        {
-                            await consumer.AcknowledgeAsync(messageConsumedContext, stoppingToken);
-                        }
-                        else
-                        {
-                            await consumer.NegativeAcknowledgeAsync(messageConsumedContext, stoppingToken);
-                        }
-                    }
-                    catch
-                    {
-                        await consumer.NegativeAcknowledgeAsync(messageConsumedContext, stoppingToken);
-                    }
-                }
-            })
-            .ToArray();
+                await RunConsumerAsync(consumer, ct);
+            });
+        
+        await Task.WhenAll(consumerTasks);
+        
+        Logger.LogInformation("Channel consumer worker finished");
+    }
 
-        await Task.WhenAll(consumers);
+    protected override async Task RunConsumerAsync(IMessageConsumer consumer, CancellationToken ct = default)
+    {
+        Logger.LogInformation(
+            "Channel consumer started Id: {ChannelConsumerId} Topic: {MessageTopic}", 
+                consumer.Id, _configuration.Topic);
+        
+        var loggingContext = new Dictionary<string, object>
+        {
+            { "ChannelConsumerId", consumer.Id },
+            { "MessageTopic",      _configuration.Topic },
+        };
+        
+        using var consumerLoggingScope = Logger.BeginScope(loggingContext);
+        
+        await base.RunConsumerAsync(consumer, ct);
+
+        Logger.LogInformation(
+            "Channel consumer finished Id: {ChannelConsumerId} Topic: {MessageTopic}",
+                consumer.Id, _configuration.Topic);
     }
 }

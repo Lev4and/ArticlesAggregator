@@ -1,8 +1,10 @@
-﻿namespace Messaging.Channel.Configuration;
+﻿using Messaging.Abstracts;
+
+namespace Messaging.Channel.Configuration;
 
 public interface IChannelConsumerConfiguration
 {
-    string Topic { get; }
+    MessageTopic Topic { get; }
     
     int Count { get; }
 }

@@ -1,10 +1,11 @@
 ﻿using DotPulsar;
+using Messaging.Abstracts;
 
 namespace Messaging.Pulsar.Configurations;
 
 public record PulsarConsumerConfiguration : IPulsarConsumerConfiguration
 {
-    public string Topic { get; init; } = null!;
+    public MessageTopic Topic { get; init; }
 
     public SubscriptionType SubscriptionType { get; init; } = SubscriptionType.KeyShared;
 

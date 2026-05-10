@@ -25,6 +25,7 @@
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts.Distributed/Messaging.Abstracts.Distributed.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Channel/Messaging.Channel.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Hosting/Messaging.Hosting.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Messages/Messaging.Messages.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Pulsar/Messaging.Pulsar.csproj" />
     <Project Path="src/backend/BuildingBlocks/Missions.Abstracts/Missions.Abstracts.csproj" />

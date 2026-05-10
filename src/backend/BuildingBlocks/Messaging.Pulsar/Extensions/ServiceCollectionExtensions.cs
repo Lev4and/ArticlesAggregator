@@ -28,6 +28,21 @@ public static class ServiceCollectionExtensions
             
             return services;
         }
+        
+        public IServiceCollection AddPulsarTopicConfiguration()
+        {
+            services.AddSingleton<IPulsarTopicConfiguration, PulsarTopicConfiguration>();
+        
+            return services;
+        }
+
+        public IServiceCollection AddPulsarTopicConfiguration<TConfiguration>()
+            where TConfiguration : class, IPulsarTopicConfiguration
+        {
+            services.AddSingleton<IPulsarTopicConfiguration, TConfiguration>();
+            
+            return services;
+        }
 
         public IServiceCollection AddPulsarMessaging(params Assembly[] assemblies)
         {
@@ -69,6 +84,28 @@ public static class ServiceCollectionExtensions
                             services.TryAddScoped(handlerInterfaceType, messageHandlerType);
                         });
                 });
+        
+            return services;
+        }
+        
+        public IServiceCollection AddPulsarConsumer(IPulsarConsumerConfiguration configuration)
+        {
+            var consumerConfigurationKey = $"PulsarConsumerConfiguration-{Guid.NewGuid().ToString()}";
+            var consumerWorkerKey        = $"PulsarConsumerWorker-{Guid.NewGuid().ToString()}";
+            
+            services.AddKeyedSingleton(consumerConfigurationKey, configuration);
+
+            services.AddKeyedScoped(consumerWorkerKey,
+                (sp, key) => 
+                    ActivatorUtilities.CreateInstance<PulsarConsumerWorker>(
+                        sp,
+                        sp.GetRequiredKeyedService<IPulsarConsumerConfiguration>(consumerConfigurationKey)));
+        
+            services.AddHostedService<PulsarConsumerWorkerService>(
+                sp => 
+                    ActivatorUtilities.CreateInstance<PulsarConsumerWorkerService>(
+                        sp, 
+                        consumerWorkerKey));
         
             return services;
         }

@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using Extensions;
 using Messaging.Abstracts;
+using Messaging.Channel.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Messaging.Channel.Extensions;
 
@@ -14,17 +14,9 @@ public static class ServiceCollectionExtensions
         var assembliesTypes = assemblies.GetTypes().ToArray();
         
         services.AddSingleton<ChannelQueueDictionary>();
-        services.AddSingleton<ChannelExchange>();
+        services.AddScoped<ChannelExchange>();
         
-        services.AddSingleton<IMessageProducer, ChannelProducer>();
-        
-        assembliesTypes
-            .Where(type => type is { IsClass: true, IsAbstract: false } && 
-                type.IsAssignableTo(typeof(ChannelConsumerWorker)))
-            .ForEach(channelConsumerWorker =>
-            {
-                services.AddSingleton(typeof(IHostedService), channelConsumerWorker);
-            });
+        services.AddScoped<IMessageProducer, ChannelProducer>();
         
         assembliesTypes
             .Where(type => type is { IsClass: true, IsAbstract: false } && type.HasInterface(typeof(IMessageHandler<>)))
@@ -41,4 +33,26 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddChannelConsumer(this IServiceCollection services, 
+        IChannelConsumerConfiguration configuration)
+    {
+        var consumerConfigurationKey = $"ChannelConsumerConfiguration-{Guid.NewGuid().ToString()}";
+        var consumerWorkerKey        = $"ChannelConsumerWorker-{Guid.NewGuid().ToString()}";
+            
+        services.AddKeyedSingleton(consumerConfigurationKey, configuration);
+
+        services.AddKeyedScoped(consumerWorkerKey,
+            (sp, key) => 
+                ActivatorUtilities.CreateInstance<ChannelConsumerWorker>(
+                    sp,
+                    sp.GetRequiredKeyedService<IChannelConsumerConfiguration>(consumerConfigurationKey)));
+        
+        services.AddHostedService<ChannelConsumerWorkerService>(
+            sp => 
+                ActivatorUtilities.CreateInstance<ChannelConsumerWorkerService>(
+                    sp, 
+                    consumerWorkerKey));
+        
+        return services;
+    }
 }

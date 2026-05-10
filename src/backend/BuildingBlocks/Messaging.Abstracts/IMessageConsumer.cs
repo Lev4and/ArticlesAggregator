@@ -2,6 +2,8 @@
 
 public interface IMessageConsumer : IAsyncDisposable
 {
+    string Id { get; }
+    
     IAsyncEnumerable<IConsumeMessageContext> ReceiveAsync(CancellationToken ct = default);
     
     Task AcknowledgeAsync(IConsumeMessageContext context, CancellationToken ct = default);

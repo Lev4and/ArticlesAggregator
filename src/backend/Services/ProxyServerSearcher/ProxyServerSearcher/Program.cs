@@ -1,7 +1,5 @@
-using Database.EntityFramework.Extensions;
 using Observability.OpenTelemetry.Extensions;
 using ProxyServerSearcher.Extensions;
-using ProxyServerSearcher.Persistence;
 using ProxyServerSearcher.Presentation.Extensions;
 using ProxyServerSearcher.Presentation.Middleware;
 using Serilog;
@@ -19,7 +17,7 @@ var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
-app.MigrateDatabase<AppDbContext>();
+// app.MigrateDatabase<AppDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

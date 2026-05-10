@@ -36,7 +36,7 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
     {
         Logger.LogInformation("Stored task mission started Type: {StoredTaskType}", typeof(TStoredTask).Name);
 
-        var workers = Enumerable.Range(0, ConcurrentCount)
+        var workers = Enumerable.Range(1, ConcurrentCount)
             .Select(_ => RunWorkerAsync(Guid.NewGuid().ToString(), ct))
                 .ToArray();
         

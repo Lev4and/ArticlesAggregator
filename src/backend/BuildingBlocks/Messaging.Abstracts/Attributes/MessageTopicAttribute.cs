@@ -3,9 +3,9 @@
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public class MessageTopicAttribute : Attribute
 {
-    public string Topic { get; }
+    public MessageTopic Topic { get; }
 
-    public MessageTopicAttribute(string topic)
+    public MessageTopicAttribute(MessageTopic topic)
     {
         Topic = topic;
     }
