@@ -14,7 +14,7 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
     protected readonly ITracer<BaseDbContext> Tracer;
     protected readonly ILogger<BaseDbContext> Logger;
     
-    public BaseDbContext(
+    protected BaseDbContext(
         ITracer<BaseDbContext> tracer, 
         ILogger<BaseDbContext> logger)
     {
@@ -22,7 +22,7 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
         Logger = logger;
     }
 
-    public BaseDbContext(
+    protected BaseDbContext(
         ITracer<BaseDbContext> tracer, 
         ILogger<BaseDbContext> logger, 
         DbContextOptions options) : 

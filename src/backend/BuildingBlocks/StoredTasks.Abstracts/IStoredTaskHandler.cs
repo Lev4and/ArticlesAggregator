@@ -2,7 +2,7 @@
 
 namespace StoredTasks.Abstracts;
 
-public interface IStoredTaskHandler<in TStoredTask> : IStoredTaskHandler
+public interface IStoredTaskHandler<TStoredTask> : IStoredTaskHandler
     where TStoredTask : IStoredTask
 {
     Task<AppResult> HandleAsync(TStoredTask storedTask, CancellationToken ct = default);

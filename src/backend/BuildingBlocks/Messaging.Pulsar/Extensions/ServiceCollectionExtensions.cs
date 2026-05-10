@@ -1,12 +1,10 @@
 ﻿using System.Reflection;
 using DotPulsar;
 using DotPulsar.Internal;
-using Extensions;
-using Messaging.Abstracts;
 using Messaging.Abstracts.Distributed;
+using Messaging.Abstracts.Extensions;
 using Messaging.Pulsar.Configurations;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Messaging.Pulsar.Extensions;
 
@@ -46,8 +44,6 @@ public static class ServiceCollectionExtensions
 
         public IServiceCollection AddPulsarMessaging(params Assembly[] assemblies)
         {
-            var assembliesTypes = assemblies.GetTypes().ToArray();
-            
             services.AddScoped(serviceProvider =>
             {
                 var pulsarConfiguration = serviceProvider.GetRequiredService<IPulsarConfiguration>();
@@ -72,18 +68,7 @@ public static class ServiceCollectionExtensions
 
             services.AddScoped<IDistributedMessageProducer, PulsarProducer>();
         
-            assembliesTypes
-                .Where(type => type is { IsClass: true, IsAbstract: false } && 
-                    type.HasInterface(typeof(IMessageHandler<>)))
-                .ForEach(messageHandlerType =>
-                {
-                    messageHandlerType
-                        .GetGenericInterfaces(typeof(IMessageHandler<>))
-                        .ForEach(handlerInterfaceType =>
-                        {
-                            services.TryAddScoped(handlerInterfaceType, messageHandlerType);
-                        });
-                });
+            services.AddMessageHandlers(assemblies);
         
             return services;
         }

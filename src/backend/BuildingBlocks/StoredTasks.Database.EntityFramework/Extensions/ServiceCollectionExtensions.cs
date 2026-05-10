@@ -2,7 +2,7 @@
 using Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using StoredTasks.Abstracts;
+using StoredTasks.Abstracts.Extensions;
 using StoredTasks.Database.Abstracts;
 
 namespace StoredTasks.Database.EntityFramework.Extensions;
@@ -13,32 +13,23 @@ public static class ServiceCollectionExtensions
         params Assembly[] assemblies)
     {
         var assembliesTypes = assemblies.GetTypes().ToArray();
-        
+
         assembliesTypes
-            .Where(type => type is { IsClass: true, IsAbstract: false } && type.HasInterface(typeof(IStoredTaskHandler<>)))
-            .ForEach(storedTaskHandlerType =>
+            .Where(type => type is { IsClass: true, IsAbstract: false } && 
+                type.HasInterface(typeof(IStoredTaskRepository<>)))
+            .ForEach(repositoryType =>
             {
-                storedTaskHandlerType
-                    .GetGenericInterfaces(typeof(IStoredTaskHandler<>))
-                    .ForEach(handlerInterfaceType =>
+                repositoryType.GetInterfaces()
+                    .Where(interfaceType => interfaceType.IsGenericType && 
+                        interfaceType.GetGenericTypeDefinition() == typeof(IStoredTaskRepository<>))
+                    .ForEach(repositoryInterfaceType =>
                     {
-                        services.TryAddScoped(handlerInterfaceType, storedTaskHandlerType);
+                        services.TryAddScoped(repositoryInterfaceType, repositoryType);
                     });
             });
         
-        assembliesTypes
-            .Where(type => type.IsInterface && type.HasInterface(typeof(IStoredTaskRepository<>)))
-            .ForEach(repositoryInterfaceType =>
-            {
-                assembliesTypes
-                    .Where(type => type is { IsClass: true, IsAbstract: false } && 
-                        type.HasInterface(repositoryInterfaceType))
-                    .ForEach(repositoryType =>
-                    {
-                        services.AddScoped(repositoryInterfaceType, repositoryType);
-                    });
-            });
-        
+        services.AddStoredTaskHandlers(assemblies);
+
         return services;
     }
 }

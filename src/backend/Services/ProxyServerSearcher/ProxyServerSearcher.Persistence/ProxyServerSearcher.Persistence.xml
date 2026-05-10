@@ -4,5 +4,17 @@
         <name>ProxyServerSearcher.Persistence</name>
     </assembly>
     <members>
+        <member name="T:ProxyServerSearcher.Persistence.Migrations.Initial">
+            <inheritdoc />
+        </member>
+        <member name="M:ProxyServerSearcher.Persistence.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ProxyServerSearcher.Persistence.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ProxyServerSearcher.Persistence.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>

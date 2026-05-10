@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\Messaging.Pulsar\Messaging.Pulsar.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Missions.Hosting\Missions.Hosting.csproj" />
       <ProjectReference Include="..\ProxyServerSearcher.Application\ProxyServerSearcher.Application.csproj" />
     </ItemGroup>
 

@@ -2,29 +2,25 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Missions.Abstracts;
-using Observability.Abstracts;
 
 namespace Missions.Hosting;
 
-public abstract class MissionWorker<TMission> : BackgroundService
+public class MissionWorker<TMission> : BackgroundService
     where TMission : IMission
 {
     private readonly IMissionDelay        _missionDelay;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     
-    protected readonly ITracer<MissionWorker<TMission>> Tracer;
     protected readonly ILogger<MissionWorker<TMission>> Logger;
 
     public MissionWorker(
         IMissionDelay missionDelay, 
         IServiceScopeFactory serviceScopeFactory,
-        ITracer<MissionWorker<TMission>> tracer,
         ILogger<MissionWorker<TMission>> logger)
     {
         _missionDelay        = missionDelay;
         _serviceScopeFactory = serviceScopeFactory;
         
-        Tracer = tracer;
         Logger = logger;
     }
 

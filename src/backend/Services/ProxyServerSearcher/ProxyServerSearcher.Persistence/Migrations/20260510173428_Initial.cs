@@ -1,0 +1,168 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace ProxyServerSearcher.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class Initial : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "proxy_server_search_stored_tasks",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    source_name = table.Column<string>(type: "text", nullable: false),
+                    state = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    worker_id = table.Column<string>(type: "text", nullable: true),
+                    attempt_deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    attempts_remaining = table.Column<int>(type: "integer", nullable: true),
+                    attempts = table.Column<int>(type: "integer", nullable: false),
+                    entity_state = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_proxy_server_search_stored_tasks", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "proxy_servers",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    normalized_name = table.Column<string>(type: "text", nullable: false),
+                    protocol = table.Column<string>(type: "text", nullable: false),
+                    hostname_or_address = table.Column<string>(type: "text", nullable: false),
+                    port = table.Column<int>(type: "integer", nullable: false),
+                    credentials_username = table.Column<string>(type: "text", nullable: true),
+                    credentials_password = table.Column<string>(type: "text", nullable: true),
+                    entity_state = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false),
+                    deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_proxy_servers", x => x.id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_attempt_deadline",
+                table: "proxy_server_search_stored_tasks",
+                column: "attempt_deadline");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_attempts",
+                table: "proxy_server_search_stored_tasks",
+                column: "attempts");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_attempts_remaining",
+                table: "proxy_server_search_stored_tasks",
+                column: "attempts_remaining");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_created_at",
+                table: "proxy_server_search_stored_tasks",
+                column: "created_at");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_deadline",
+                table: "proxy_server_search_stored_tasks",
+                column: "deadline");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_entity_state",
+                table: "proxy_server_search_stored_tasks",
+                column: "entity_state");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_source_name",
+                table: "proxy_server_search_stored_tasks",
+                column: "source_name");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_state",
+                table: "proxy_server_search_stored_tasks",
+                column: "state");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_state_attempt_deadline_att",
+                table: "proxy_server_search_stored_tasks",
+                columns: new[] { "state", "attempt_deadline", "attempts_remaining", "deadline" });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_updated_at",
+                table: "proxy_server_search_stored_tasks",
+                column: "updated_at");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_server_search_stored_tasks_worker_id",
+                table: "proxy_server_search_stored_tasks",
+                column: "worker_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_created_at",
+                table: "proxy_servers",
+                column: "created_at");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_deleted_at",
+                table: "proxy_servers",
+                column: "deleted_at");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_entity_state",
+                table: "proxy_servers",
+                column: "entity_state");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_hostname_or_address",
+                table: "proxy_servers",
+                column: "hostname_or_address");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_is_deleted",
+                table: "proxy_servers",
+                column: "is_deleted");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_normalized_name",
+                table: "proxy_servers",
+                column: "normalized_name");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_port",
+                table: "proxy_servers",
+                column: "port");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_protocol",
+                table: "proxy_servers",
+                column: "protocol");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_updated_at",
+                table: "proxy_servers",
+                column: "updated_at");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "proxy_server_search_stored_tasks");
+
+            migrationBuilder.DropTable(
+                name: "proxy_servers");
+        }
+    }
+}

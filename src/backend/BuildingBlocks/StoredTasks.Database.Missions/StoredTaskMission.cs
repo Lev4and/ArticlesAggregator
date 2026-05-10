@@ -15,11 +15,13 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
     protected readonly IServiceProvider                        ServiceProvider;
     
     protected virtual int TaskLimit => 10;
-    
-    protected virtual int ConcurrentCount => 1;
-    
+
     protected virtual TimeSpan AttemptDuration => TimeSpan.FromMinutes(1);
     
+    protected virtual int WorkerCount => 1;
+
+    protected virtual TimeSpan? IntervalDelay => TimeSpan.FromSeconds(5);
+
     public StoredTaskMission(
         ITracer<StoredTaskMission<TStoredTask>> tracer,
         ILogger<StoredTaskMission<TStoredTask>> logger,
@@ -36,9 +38,8 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
     {
         Logger.LogInformation("Stored task mission started Type: {StoredTaskType}", typeof(TStoredTask).Name);
 
-        var workers = Enumerable.Range(1, ConcurrentCount)
-            .Select(_ => RunWorkerAsync(Guid.NewGuid().ToString(), ct))
-                .ToArray();
+        var workers = Enumerable.Range(1, WorkerCount)
+            .Select(_ => RunWorkerAsync(Guid.NewGuid().ToString(), ct));
         
         await Task.WhenAll(workers);
         
@@ -96,6 +97,11 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
                 {
                     Logger.LogError(exception, "Stored task handle failed Id: {StoredTaskId}", capturedTask.Id);
                 }
+            }
+
+            if (IntervalDelay is not null)
+            {
+                await Task.Delay(IntervalDelay.Value, ct);
             }
         }
         

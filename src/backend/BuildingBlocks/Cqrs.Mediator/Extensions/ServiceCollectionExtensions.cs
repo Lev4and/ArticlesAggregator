@@ -5,14 +5,13 @@ namespace Cqrs.Mediator.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCqrsMediator(this IServiceCollection services, 
-        params Assembly[] assembliesToScan)
+    public static IServiceCollection AddCqrsMediator(this IServiceCollection services, params Assembly[] assemblies)
     {
         services.AddMediator(options =>
         {
             options.ServiceLifetime         = ServiceLifetime.Scoped;
             options.GenerateTypesAsInternal = true;
-            options.Assemblies              = [..assembliesToScan];
+            options.Assemblies              = [..assemblies];
         });
         
         return services;

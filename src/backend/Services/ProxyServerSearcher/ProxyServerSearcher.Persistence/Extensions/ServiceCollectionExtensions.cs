@@ -8,11 +8,16 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services)
     {
+        var assemblies = new[]
+        {
+            typeof(AppDbContext).Assembly
+        };
+
         services.AddPostgresDatabaseConfiguration();
         
         services.AddEntityFrameworkConfiguration();
-        services.AddEntityFramework<AppDbContext>(typeof(ServiceCollectionExtensions).Assembly);
-        services.AddEntityFrameworkStoredTasks(typeof(ServiceCollectionExtensions).Assembly);
+        services.AddEntityFramework<AppDbContext>(assemblies);
+        services.AddEntityFrameworkStoredTasks(assemblies);
         
         return services;
     }

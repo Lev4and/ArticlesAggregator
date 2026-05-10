@@ -7,6 +7,7 @@ using Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Database.EntityFramework.Extensions;
 
@@ -29,10 +30,13 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        public IServiceCollection AddEntityFramework<TDbContext>(params Assembly[] assembliesToScan) 
+        public IServiceCollection AddEntityFramework<TDbContext>(params Assembly[] assemblies) 
             where TDbContext : BaseDbContext, IUnitOfWork
         {
-            var assembliesTypes = assembliesToScan.SelectMany(assembly => assembly.GetTypes()).ToArray();
+            var assembliesTypes = assemblies
+                .Append(typeof(BaseDbContext).Assembly)
+                    .SelectMany(assembly => assembly.GetTypes())
+                        .ToArray();
             
             assembliesTypes
                 .Where(type => type is { IsClass: true, IsAbstract: false } && 
@@ -63,17 +67,17 @@ public static class ServiceCollectionExtensions
                     options.EnableSensitiveDataLogging();
                 }
             });
-
+            
             assembliesTypes
-                .Where(type => type.IsInterface && type.HasInterface(typeof(IRepository<,>)))
-                .ForEach(repositoryInterfaceType =>
+                .Where(type => type is { IsClass: true, IsAbstract: false } &&
+                    type.HasInterface(typeof(IRepository<,>)))
+                .ForEach(repositoryType =>
                 {
-                    assembliesTypes
-                        .Where(type => type is { IsClass: true, IsAbstract: false } && 
-                            type.HasInterface(repositoryInterfaceType))
-                        .ForEach(repositoryType =>
+                    repositoryType.GetInterfaces()
+                        .Where(interfaceType => interfaceType.HasInterface(typeof(IRepository<,>)))
+                        .ForEach(repositoryInterfaceType =>
                         {
-                            services.AddScoped(repositoryInterfaceType, repositoryType);
+                            services.TryAddScoped(repositoryInterfaceType, repositoryType);
                         });
                 });
 

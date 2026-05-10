@@ -57,7 +57,13 @@ public static class WebApplicationBuilderExtensions
                     tracerProviderBuilder.AddSource(serviceName);
                     
                     tracerProviderBuilder.AddAspNetCoreInstrumentation();
-                    tracerProviderBuilder.AddEntityFrameworkCoreInstrumentation();
+                    tracerProviderBuilder.AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.EnrichWithIDbCommand = (activity, command) =>
+                        {
+                            activity.DisplayName = "db.query";
+                        };
+                    });
                     tracerProviderBuilder.AddSqlClientInstrumentation();
                     tracerProviderBuilder.AddRedisInstrumentation();
                     tracerProviderBuilder.AddHttpClientInstrumentation();

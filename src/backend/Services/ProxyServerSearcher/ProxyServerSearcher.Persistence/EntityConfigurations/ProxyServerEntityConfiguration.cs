@@ -17,6 +17,7 @@ public class ProxyServerEntityConfiguration : IEntityTypeConfiguration<ProxyServ
         builder.HasIndex(e => e.HostnameOrAddress);
         builder.HasIndex(e => e.Port);
         builder.OwnsOne(e => e.Credentials);
+        builder.Property(e => e.EntityState).HasConversion<string>();
         builder.HasIndex(e => e.EntityState);
         builder.HasIndex(e => e.CreatedAt);
         builder.HasIndex(e => e.UpdatedAt);

@@ -22,7 +22,8 @@ public abstract class StoredTaskEntityConfiguration<TStoredTask> : IEntityTypeCo
         builder.HasIndex(e => e.Deadline);
         builder.HasIndex(e => e.AttemptsRemaining);
         builder.HasIndex(e => e.Attempts);
-        builder.HasIndex(e => e.State);
+        builder.Property(e => e.EntityState).HasConversion<string>();
+        builder.HasIndex(e => e.EntityState);
         builder.HasIndex(e => new { e.State, e.AttemptDeadline, e.AttemptsRemaining, e.Deadline });
     }
 }

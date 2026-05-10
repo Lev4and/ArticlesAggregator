@@ -67,6 +67,10 @@ public class HideMyNameProxyServerSource : IProxyServerSource
                     }
                 }
             }
+            else
+            {
+                hasNextPage = false;
+            }
             
             var result = new List<ProxyServerDto>();
 

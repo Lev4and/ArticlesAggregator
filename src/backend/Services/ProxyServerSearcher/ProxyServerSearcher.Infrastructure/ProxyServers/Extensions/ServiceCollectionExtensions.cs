@@ -1,6 +1,9 @@
 ﻿using System.Net;
 using Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Missions.Hosting.Extensions;
+using ProxyServerSearcher.Application.Abstracts.ProxyServers;
+using ProxyServerSearcher.Application.UseCases.ProxyServers.Missions;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Sources;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers.Extensions;
@@ -26,6 +29,14 @@ public static class ServiceCollectionExtensions
                 {
                     registrator.Register(services);
                 });
+            
+            services.AddScoped<IProxyServerSourceService, ProxyServerSourceService>();
+
+            services.AddMission<ProxyServerSearchPlanMission>(
+                TimeSpan.FromSeconds(5), TimeSpan.FromHours(1));
+
+            services.AddMission<ProxyServerSearchStoredTaskMission>(
+                TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
             
             return services;
         }
