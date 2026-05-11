@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Messaging.Outbox.Abstracts\Messaging.Outbox.Abstracts.csproj" />
+      <ProjectReference Include="..\Observability.Abstracts\Observability.Abstracts.csproj" />
+      <ProjectReference Include="..\StoredTasks.Database.Missions\StoredTasks.Database.Missions.csproj" />
+    </ItemGroup>
+
+</Project>

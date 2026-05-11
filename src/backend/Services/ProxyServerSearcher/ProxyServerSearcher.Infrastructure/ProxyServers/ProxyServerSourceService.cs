@@ -5,7 +5,7 @@ using ProxyServerSearcher.Application.Abstracts.ProxyServers;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
 using Result;
 
-namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources;
+namespace ProxyServerSearcher.Infrastructure.ProxyServers;
 
 public class ProxyServerSourceService : IProxyServerSourceService
 {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
+using Result;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources.ProxyMania;
 
@@ -20,7 +21,7 @@ public class ProxyManiaClient : IDisposable
         _httpClient = httpClientFactory.CreateClient(ProxyServerSourceConstants.ProxyMania);
     }
 
-    public async Task<Stream> GetFreeProxyListHtmlPageAsync(int page = 1, CancellationToken ct = default)
+    public async Task<AppResult<Stream>> GetFreeProxyListHtmlPageAsync(int page = 1, CancellationToken ct = default)
     {
         using var operation =
             _tracer.StartOperation($"Get proxy server list html page ({ProxyServerSourceConstants.ProxyMania})");
@@ -33,11 +34,27 @@ public class ProxyManiaClient : IDisposable
             RequestUri = new Uri($"free-proxy?page={page}", UriKind.Relative)
         };
         
-        var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, ct);
+        try
+        {
+            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, ct);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                var responseStream = await httpResponseMessage.Content.ReadAsStreamAsync(ct);
+                
+                return AppResult<Stream>.Success(responseStream);
+            }
+            
+            _logger.LogError("Get proxy server list html page failed StatusCode: {HttpStatusCode}", 
+                httpResponseMessage.StatusCode);
         
-        httpResponseMessage.EnsureSuccessStatusCode();
-        
-        return await httpResponseMessage.Content.ReadAsStreamAsync(ct);
+            return AppResult<Stream>.Failure(AppErrorType.Failed, "Get proxy server list html page failed");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Get proxy server list html page failed");
+            
+            return AppResult<Stream>.Failure(AppErrorType.Failed, "Get proxy server list html page failed");
+        }
     }
 
     public void Dispose()

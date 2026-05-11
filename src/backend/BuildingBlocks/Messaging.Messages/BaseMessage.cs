@@ -1,4 +1,6 @@
-﻿namespace Messaging.Abstracts;
+﻿using Messaging.Abstracts;
+
+namespace Messaging.Messages;
 
 public abstract record BaseMessage : IMessage
 {

@@ -14,5 +14,7 @@ public class ProxyServerSearchStoredTaskEntityConfiguration : StoredTaskEntityCo
         base.Configure(builder);
 
         builder.HasIndex(e => e.SourceName);
+        builder.HasIndex(e => e.PlannedAt);
+        builder.HasIndex(e => new { e.SourceName, e.PlannedAt }).IsUnique();
     }
 }

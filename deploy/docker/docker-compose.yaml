@@ -8,115 +8,141 @@ x-logging:  &default-logging
     tag: "{{.Name}}"
 
 services:
-  zookeeper:
-    image: apachepulsar/pulsar:4.2.0
-    container_name: zookeeper
+#  zookeeper:
+#    image: apachepulsar/pulsar:4.2.0
+#    container_name: zookeeper
+#    restart: always
+#    command:
+#      - bash
+#      - -c
+#      - |
+#        bin/apply-config-from-env.py conf/zookeeper.conf && \
+#        bin/generate-zookeeper-config.sh conf/zookeeper.conf && \
+#        exec bin/pulsar zookeeper
+#    healthcheck:
+#      test: [ "CMD", "bin/pulsar-zookeeper-ruok.sh" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 30
+#    logging: *default-logging
+#    volumes:
+#      - ./data/zookeeper:/pulsar/data/zookeeper
+#    environment:
+#      - metadataStoreUrl=zk:zookeeper:2181
+#      - PULSAR_MEM=-Xms256m -Xmx256m -XX:MaxDirectMemorySize=256m
+#    networks:
+#      - pulsar-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+#
+#  pulsar-init:
+#    image: apachepulsar/pulsar:4.2.0
+#    container_name: pulsar-init
+#    hostname: pulsar-init
+#    command:
+#      - bash
+#      - -c
+#      - |
+#        bin/pulsar initialize-cluster-metadata \
+#        --cluster cluster-a \
+#        --zookeeper zookeeper:2181 \
+#        --configuration-store zookeeper:2181 \
+#        --web-service-url http://broker:8080 \
+#        --broker-service-url pulsar://broker:6650
+#    restart: on-failure
+#    logging: *default-logging
+#    depends_on:
+#      - zookeeper
+#    networks:
+#      - pulsar-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+#
+#  bookie:
+#    image: apachepulsar/pulsar:4.2.0
+#    container_name: bookie
+#    command: bash -c "bin/apply-config-from-env.py conf/bookkeeper.conf && exec bin/pulsar bookie"
+#    restart: on-failure
+#    logging: *default-logging
+#    depends_on:
+#      - zookeeper
+#      - pulsar-init
+#    environment:
+#      - clusterName=cluster-a
+#      - zkServers=zookeeper:2181
+#      - metadataServiceUri=metadata-store:zk:zookeeper:2181
+#      - advertisedAddress=bookie
+#      - BOOKIE_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
+#    volumes:
+#      - ./data/bookkeeper:/pulsar/data/bookkeeper
+#    networks:
+#      - pulsar-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+#
+#  broker:
+#    image: apachepulsar/pulsar:4.2.0
+#    container_name: broker
+#    hostname: broker
+#    restart: on-failure
+#    command: bash -c "bin/apply-config-from-env.py conf/broker.conf && exec bin/pulsar broker"
+#    logging: *default-logging
+#    depends_on:
+#      - zookeeper
+#      - bookie
+#    environment:
+#      - metadataStoreUrl=zk:zookeeper:2181
+#      - zookeeperServers=zookeeper:2181
+#      - clusterName=cluster-a
+#      - managedLedgerDefaultEnsembleSize=1
+#      - managedLedgerDefaultWriteQuorum=1
+#      - managedLedgerDefaultAckQuorum=1
+#      - advertisedAddress=broker
+#      - advertisedListeners=external:pulsar://127.0.0.1:6650
+#      - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
+#    ports:
+#      - "6650:6650"
+#      - "8080:8080"
+#    networks:
+#      - pulsar-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+  
+  pulsar:
+    image: apachepulsar/pulsar:4.0.5
+    container_name: pulsar
+    command: >
+      bin/pulsar standalone
     restart: always
-    command:
-      - bash
-      - -c
-      - |
-        bin/apply-config-from-env.py conf/zookeeper.conf && \
-        bin/generate-zookeeper-config.sh conf/zookeeper.conf && \
-        exec bin/pulsar zookeeper
-    healthcheck:
-      test: [ "CMD", "bin/pulsar-zookeeper-ruok.sh" ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
     logging: *default-logging
+    environment:
+      PULSAR_STANDALONE_USE_ZOOKEEPER: 1
     volumes:
-      - ./data/zookeeper:/pulsar/data/zookeeper
-    environment:
-      - metadataStoreUrl=zk:zookeeper:2181
-      - PULSAR_MEM=-Xms256m -Xmx256m -XX:MaxDirectMemorySize=256m
-    networks:
-      - pulsar-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-
-  pulsar-init:
-    image: apachepulsar/pulsar:4.2.0
-    container_name: pulsar-init
-    hostname: pulsar-init
-    command:
-      - bash
-      - -c
-      - |
-        bin/pulsar initialize-cluster-metadata \
-        --cluster cluster-a \
-        --zookeeper zookeeper:2181 \
-        --configuration-store zookeeper:2181 \
-        --web-service-url http://broker:8080 \
-        --broker-service-url pulsar://broker:6650
-    restart: on-failure
-    logging: *default-logging
-    depends_on:
-      - zookeeper
-    networks:
-      - pulsar-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-
-  bookie:
-    image: apachepulsar/pulsar:4.2.0
-    container_name: bookie
-    command: bash -c "bin/apply-config-from-env.py conf/bookkeeper.conf && exec bin/pulsar bookie"
-    restart: on-failure
-    logging: *default-logging
-    depends_on:
-      - zookeeper
-      - pulsar-init
-    environment:
-      - clusterName=cluster-a
-      - zkServers=zookeeper:2181
-      - metadataServiceUri=metadata-store:zk:zookeeper:2181
-      - advertisedAddress=bookie
-      - BOOKIE_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
-    volumes:
-      - ./data/bookkeeper:/pulsar/data/bookkeeper
-    networks:
-      - pulsar-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-
-  broker:
-    image: apachepulsar/pulsar:4.2.0
-    container_name: broker
-    hostname: broker
-    restart: on-failure
-    command: bash -c "bin/apply-config-from-env.py conf/broker.conf && exec bin/pulsar broker"
-    logging: *default-logging
-    depends_on:
-      - zookeeper
-      - bookie
-    environment:
-      - metadataStoreUrl=zk:zookeeper:2181
-      - zookeeperServers=zookeeper:2181
-      - clusterName=cluster-a
-      - managedLedgerDefaultEnsembleSize=1
-      - managedLedgerDefaultWriteQuorum=1
-      - managedLedgerDefaultAckQuorum=1
-      - advertisedAddress=broker
-      - PULSAR_MEM=-Xms512m -Xmx512m -XX:MaxDirectMemorySize=256m
+      - ./data/pulsar/data:/pulsar/data
     ports:
       - "6650:6650"
       - "8080:8080"

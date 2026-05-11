@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
                 });
             
             services.AddScoped<IProxyServerSourceService, ProxyServerSourceService>();
+            services.AddScoped<IProxyServerService, ProxyServerService>();
 
             services.AddMission<ProxyServerSearchPlanMission>(
                 TimeSpan.FromSeconds(5), TimeSpan.FromHours(1));

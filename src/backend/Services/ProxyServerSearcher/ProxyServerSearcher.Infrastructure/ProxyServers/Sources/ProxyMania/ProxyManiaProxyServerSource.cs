@@ -42,7 +42,14 @@ public class ProxyManiaProxyServerSource : IProxyServerSource
 
         do
         {
-            var htmlPageContent = await _client.GetFreeProxyListHtmlPageAsync(currentPage, ct: ct);
+            var htmlPageResult = await _client.GetFreeProxyListHtmlPageAsync(currentPage, ct: ct);
+            if (htmlPageResult.IsFailure)
+            {
+                yield break;
+            }
+
+            await using var htmlPageContent = htmlPageResult.Result!;
+            
             using var htmlDocument = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
             var htmlDocumentNavigator = htmlDocument.CreateNavigator();
             

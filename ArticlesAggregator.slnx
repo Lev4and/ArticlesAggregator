@@ -22,11 +22,16 @@
     <Project Path="src/backend/BuildingBlocks/DomainEvents.Database.Abstracts/DomainEvents.Database.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/DomainEvents.Database.EntityFramework/DomainEvents.Database.EntityFramework.csproj" />
     <Project Path="src/backend/BuildingBlocks/Extensions/Extensions.csproj" />
-    <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts.Distributed/Messaging.Abstracts.Distributed.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Channel/Messaging.Channel.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Hosting/Messaging.Hosting.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Inbox.Abstracts/Messaging.Inbox.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Inbox.EntityFramework/Messaging.Inbox.EntityFramework.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Inbox.Handling/Messaging.Inbox.Handling.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Messages/Messaging.Messages.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Outbox.Abstracts/Messaging.Outbox.Abstracts.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Outbox.EntityFramework/Messaging.Outbox.EntityFramework.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Messaging.Outbox.Handling/Messaging.Outbox.Handling.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Pulsar/Messaging.Pulsar.csproj" />
     <Project Path="src/backend/BuildingBlocks/Missions.Abstracts/Missions.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Missions.Hosting/Missions.Hosting.csproj" />

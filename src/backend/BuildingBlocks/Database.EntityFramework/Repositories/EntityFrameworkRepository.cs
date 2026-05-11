@@ -35,9 +35,9 @@ public abstract class EntityFrameworkRepository<TDbContext, TEntity, TKey> : IRe
 
     public virtual async Task AddAsync(TEntity entity, CancellationToken ct = default)
     {
-        using var operation = Tracer.StartOperation("Add entity to change tracker");
+        using var operation = Tracer.StartOperation("Add entity to db");
         
-        Logger.LogInformation("Add entity to change tracker");
+        Logger.LogInformation("Add entity to db");
         
         Add(entity);
         

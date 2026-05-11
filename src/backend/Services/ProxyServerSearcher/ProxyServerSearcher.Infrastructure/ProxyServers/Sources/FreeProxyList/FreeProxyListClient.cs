@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Observability.Abstracts;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Sources.FreeProxyList.Models.Api;
+using Result;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources.FreeProxyList;
 
@@ -22,26 +23,41 @@ public class FreeProxyListClient : IDisposable
         _httpClient = httpClientFactory.CreateClient(ProxyServerSourceConstants.FreeProxyList);
     }
 
-    public async Task<ApiProxyServer[]> GetProxyServerListAsync(CancellationToken ct = default)
+    public async Task<AppResult<ApiProxyServer[]>> GetProxyServerListAsync(CancellationToken ct = default)
     {
         using var operation =
             _tracer.StartOperation($"Get proxy server list ({ProxyServerSourceConstants.FreeProxyList})");
         
         _logger.LogInformation($"Get proxy server list ({ProxyServerSourceConstants.FreeProxyList})");
-        
+
         var httpClientRequest = new HttpRequestMessage
         {
-            Method     = HttpMethod.Get,
+            Method = HttpMethod.Get,
             RequestUri = new Uri("proxies/all/data.json", UriKind.Relative),
         };
+
+        try
+        {
+            var httpResponseMessage = await _httpClient.SendAsync(httpClientRequest, ct);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                var responseJson = await httpResponseMessage.Content.ReadAsStringAsync(ct);
+                var proxyServers = JsonConvert.DeserializeObject<ApiProxyServer[]>(responseJson) ?? [];
+                
+                return AppResult<ApiProxyServer[]>.Success(proxyServers);
+            }
+
+            _logger.LogError("Get proxy server list failed StatusCode: {HttpStatusCode}", 
+                httpResponseMessage.StatusCode);
         
-        var httpClientResponse = await _httpClient.SendAsync(httpClientRequest, ct);
-        
-        httpClientResponse.EnsureSuccessStatusCode();
-        
-        var responseJson = await httpClientResponse.Content.ReadAsStringAsync(ct);
-        
-        return JsonConvert.DeserializeObject<ApiProxyServer[]>(responseJson) ?? [];
+            return AppResult<ApiProxyServer[]>.Failure(AppErrorType.Failed, "Get proxy server list failed");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Get proxy server list failed");
+            
+            return AppResult<ApiProxyServer[]>.Failure(AppErrorType.Failed, "Get proxy server list failed");
+        }
     }
 
     public void Dispose()

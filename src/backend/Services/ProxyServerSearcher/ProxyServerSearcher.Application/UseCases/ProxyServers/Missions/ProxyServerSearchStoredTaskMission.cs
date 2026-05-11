@@ -10,9 +10,9 @@ public class ProxyServerSearchStoredTaskMission : StoredTaskMission<ProxyServerS
 {
     protected override int TaskLimit => 1;
 
-    protected override int WorkerCount => 2;
-    
     protected override TimeSpan AttemptDuration => TimeSpan.FromMinutes(10);
+    
+    protected override int WorkerCount => 2;
 
     public ProxyServerSearchStoredTaskMission(
         ITracer<StoredTaskMission<ProxyServerSearchStoredTask>> tracer, 

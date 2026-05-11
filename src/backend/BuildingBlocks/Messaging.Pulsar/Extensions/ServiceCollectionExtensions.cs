@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using DotPulsar;
 using DotPulsar.Internal;
-using Messaging.Abstracts.Distributed;
+using Messaging.Abstracts;
 using Messaging.Abstracts.Extensions;
 using Messaging.Pulsar.Configurations;
 using Microsoft.Extensions.DependencyInjection;

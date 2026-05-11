@@ -2,8 +2,8 @@
 using DotPulsar;
 using DotPulsar.Abstractions;
 using DotPulsar.Extensions;
+using Messaging.Abstracts;
 using Messaging.Abstracts.Attributes;
-using Messaging.Abstracts.Distributed;
 using Messaging.Pulsar.Configurations;
 using Messaging.Pulsar.Constants;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Database.Abstracts;
+using Extensions;
+using Microsoft.Extensions.Logging;
 using Missions.Abstracts;
 using Observability.Abstracts;
 using ProxyServerSearcher.Application.Abstracts.ProxyServers;
@@ -13,17 +15,20 @@ public class ProxyServerSearchPlanMission : IMission
     private readonly ILogger<ProxyServerSearchPlanMission> _logger;
     private readonly IProxyServerSourceService _proxyServerSourceService;
     private readonly IStoredTaskRepository<ProxyServerSearchStoredTask> _repository;
-    
+    private readonly IUnitOfWork _unitOfWork;
+
     public ProxyServerSearchPlanMission(
         ITracer<ProxyServerSearchPlanMission> tracer, 
         ILogger<ProxyServerSearchPlanMission> logger,
         IProxyServerSourceService proxyServerSourceService,
-        IStoredTaskRepository<ProxyServerSearchStoredTask> repository)
+        IStoredTaskRepository<ProxyServerSearchStoredTask> repository,
+        IUnitOfWork unitOfWork)
     {
         _tracer = tracer;
         _logger = logger;
         _proxyServerSourceService = proxyServerSourceService;
         _repository = repository;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task RunAsync(CancellationToken ct = default)
@@ -35,21 +40,39 @@ public class ProxyServerSearchPlanMission : IMission
         var listResult = await _proxyServerSourceService.GetListAsync(ct);
         if (listResult.IsFailure)
         {
-            _logger.LogError("Proxy server search plan mission failed");
+            var error = listResult.Errors.First();
+            
+            _logger.LogError(
+                "Proxy server search plan mission failed ErrorType: {ErrorType} ErrorMessage: {ErrorMessage}",
+                    error.Type, error.Message);
             
             return;
         }
+        
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(ct);
 
-        var storedTasks =
-            listResult.Result!.Select(sourceName => 
-                new ProxyServerSearchStoredTask
-                {
-                    SourceName = sourceName
-                });
-        
-        await _repository.AddRangeAsync(storedTasks, ct);
-        
-        _logger.LogInformation("Proxy server search plan mission finished");
+        try
+        {
+            var storedTasks =
+                listResult.Result!.Select(sourceName => 
+                    new ProxyServerSearchStoredTask
+                    {
+                        SourceName = sourceName,
+                        PlannedAt  = DateTime.UtcNow.RoundDown(TimeSpan.FromHours(1)),
+                    });
+            
+            _repository.AddRange(storedTasks);
+
+            await _unitOfWork.SaveChangesAsync(ct);
+            
+            await transaction.CommitAsync(ct);
+            
+            _logger.LogInformation("Proxy server search plan mission finished");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Proxy server search plan mission failed");
+        }
     }
 
     public void Dispose()

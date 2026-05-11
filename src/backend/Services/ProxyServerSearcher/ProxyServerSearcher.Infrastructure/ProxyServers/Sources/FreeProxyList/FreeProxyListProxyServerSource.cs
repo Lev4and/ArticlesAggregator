@@ -34,18 +34,20 @@ public class FreeProxyListProxyServerSource : IProxyServerSource
         _logger.LogInformation("Provide proxy servers Source: {ProxyServersSource}", 
             ProxyServerSourceConstants.FreeProxyList);
         
-        var proxyServerList = await _client.GetProxyServerListAsync(ct);
-
-        yield return proxyServerList
-            .Select(proxyServer => new ProxyServerDto
-            {
-                Protocol          = Enum.GetValues<ProxyServerProtocol>().First(protocol =>
-                    string.Equals(protocol.ToString(), proxyServer.Protocol,
-                        StringComparison.CurrentCultureIgnoreCase)),
-                HostnameOrAddress = proxyServer.Host, 
-                Port              = proxyServer.Port
-            })
-            .ToImmutableList();
+        var listResult = await _client.GetProxyServerListAsync(ct);
+        if (listResult.IsSuccess)
+        {
+            yield return listResult.Result!
+                .Select(proxyServer => new ProxyServerDto
+                {
+                    Protocol = Enum.GetValues<ProxyServerProtocol>().First(protocol =>
+                        string.Equals(protocol.ToString(), proxyServer.Protocol,
+                            StringComparison.CurrentCultureIgnoreCase)),
+                    HostnameOrAddress = proxyServer.Host,
+                    Port = proxyServer.Port
+                })
+                .ToImmutableList();
+        }
     }
 
     public void Dispose()

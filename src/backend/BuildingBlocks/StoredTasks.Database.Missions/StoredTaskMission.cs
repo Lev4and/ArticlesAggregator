@@ -58,6 +58,15 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
             await Repository.CaptureTasksAsync(workerId, DateTime.UtcNow.Add(AttemptDuration), TaskLimit, ct);
             
             var capturedTasks = await Repository.GetCapturedTasksAsync(workerId, TaskLimit, ct);
+            if (capturedTasks.Count == 0)
+            {
+                if (IntervalDelay is not null)
+                {
+                    await Task.Delay(IntervalDelay.Value, ct);
+                    
+                    continue;
+                }
+            }
             
             foreach (var capturedTask in capturedTasks)
             {
@@ -97,11 +106,6 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
                 {
                     Logger.LogError(exception, "Stored task handle failed Id: {StoredTaskId}", capturedTask.Id);
                 }
-            }
-
-            if (IntervalDelay is not null)
-            {
-                await Task.Delay(IntervalDelay.Value, ct);
             }
         }
         

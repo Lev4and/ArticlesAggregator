@@ -1,4 +1,4 @@
-﻿namespace Messaging.Abstracts.Distributed;
+﻿namespace Messaging.Abstracts;
 
 public interface IDistributedMessageProducer : IMessageProducer
 {

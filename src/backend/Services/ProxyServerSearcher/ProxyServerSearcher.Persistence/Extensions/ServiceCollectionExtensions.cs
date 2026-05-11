@@ -1,4 +1,5 @@
 ﻿using Database.EntityFramework.Extensions;
+using Messaging.Outbox.EntityFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using StoredTasks.Database.EntityFramework.Extensions;
 
@@ -18,6 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddEntityFrameworkConfiguration();
         services.AddEntityFramework<AppDbContext>(assemblies);
         services.AddEntityFrameworkStoredTasks(assemblies);
+        services.AddEntityFrameworkOutboxMessageRepository<AppDbContext>();
         
         return services;
     }

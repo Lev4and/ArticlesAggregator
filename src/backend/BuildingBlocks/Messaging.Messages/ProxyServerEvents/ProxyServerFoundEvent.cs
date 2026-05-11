@@ -7,5 +7,5 @@ namespace Messaging.Messages.ProxyServerEvents;
 [MessageTopic(MessageTopic.ProxyServerEvents)]
 public record ProxyServerFoundEvent : BaseMessage
 {
-    
+    public Guid ProxyServerId { get; init; }
 }

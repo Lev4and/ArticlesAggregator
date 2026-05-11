@@ -3,8 +3,6 @@ using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerSearcher.Application.Abstracts.ProxyServers;
 using ProxyServerSearcher.Domain.Entities;
-using ProxyServerSearcher.Domain.Repositories;
-using ProxyServerSearcher.Domain.ValueObjects;
 using Result;
 using StoredTasks.Abstracts;
 
@@ -14,19 +12,19 @@ public class ProxyServerSearchStoredTaskHandler : IStoredTaskHandler<ProxyServer
 {
     private readonly ITracer<ProxyServerSearchStoredTaskHandler> _tracer;
     private readonly ILogger<ProxyServerSearchStoredTaskHandler> _logger;
+    private readonly IProxyServerService _proxyServerService;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IProxyServerRepository _repository;
-    
+
     public ProxyServerSearchStoredTaskHandler(
         ITracer<ProxyServerSearchStoredTaskHandler> tracer, 
-        ILogger<ProxyServerSearchStoredTaskHandler> logger, 
-        IServiceProvider serviceProvider, 
-        IProxyServerRepository repository)
+        ILogger<ProxyServerSearchStoredTaskHandler> logger,
+        IProxyServerService proxyServerService,
+        IServiceProvider serviceProvider)
     {
         _tracer = tracer;
         _logger = logger;
+        _proxyServerService = proxyServerService;
         _serviceProvider = serviceProvider;
-        _repository = repository;
     }
     
     public async Task<AppResult> HandleAsync(ProxyServerSearchStoredTask storedTask, CancellationToken ct = default)
@@ -35,7 +33,7 @@ public class ProxyServerSearchStoredTaskHandler : IStoredTaskHandler<ProxyServer
         
         _logger.LogInformation("Proxy server search task handle Id: {StoredTaskId}", storedTask.Id);
 
-        var proxyServerSource = _serviceProvider.GetKeyedService<IProxyServerSource>(storedTask.SourceName);
+        using var proxyServerSource = _serviceProvider.GetKeyedService<IProxyServerSource>(storedTask.SourceName);
         if (proxyServerSource is null)
         {
             _logger.LogError("Proxy server source not found Name: {ProxyServerSourceName}", storedTask.SourceName);
@@ -43,32 +41,19 @@ public class ProxyServerSearchStoredTaskHandler : IStoredTaskHandler<ProxyServer
             return AppResult.Success();
         }
 
-        await foreach (var proxyServerModels in proxyServerSource.ProvideAsync(ct))
+        await foreach (var models in proxyServerSource.ProvideAsync(ct))
         {
-            var proxyServerNames = proxyServerModels
-                .Select(proxyServer => proxyServer.NormalizedName)
-                    .ToArray();
-
-            var oldProxyServers = await _repository.GetExistsAsync(proxyServerNames, ct);
-            var newProxyServers = proxyServerModels
-                .Where(proxyServer => !oldProxyServers.Contains(proxyServer.NormalizedName))
-                .Select(proxyServer =>
-                    new ProxyServer
-                    {
-                        NormalizedName    = proxyServer.NormalizedName,
-                        Protocol          = proxyServer.Protocol,
-                        HostnameOrAddress = proxyServer.HostnameOrAddress,
-                        Port              = proxyServer.Port,
-                        Credentials       = proxyServer.Credentials is not null
-                            ? new ProxyServerCredentials
-                            {
-                                Username = proxyServer.Credentials.Username, 
-                                Password = proxyServer.Credentials.Password
-                            }
-                            : null
-                    });
-            
-            await _repository.AddRangeAsync(newProxyServers, ct);
+            var createResult = await _proxyServerService.CreateBatchAsync(models.ToArray(), ct);
+            if (createResult.IsFailure)
+            {
+                var error = createResult.Errors.First();
+                
+                _logger.LogError(
+                    "Proxy servers create failed ErrorType: {ErrorType} ErrorMessage: {ErrorMessage}",
+                        error.Type, error.Message);
+                
+                break;
+            }
         }
         
         return AppResult.Success();
