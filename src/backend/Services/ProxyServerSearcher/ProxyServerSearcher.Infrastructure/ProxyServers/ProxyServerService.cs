@@ -1,6 +1,8 @@
 ﻿using Database.Abstracts;
+using Extensions;
 using Messaging.Messages.ProxyServerEvents;
 using Messaging.Outbox.Abstracts;
+using Messaging.Outbox.Abstracts.Extensions;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerSearcher.Application.Abstracts.ProxyServers;
@@ -59,11 +61,11 @@ public class ProxyServerService : IProxyServerService
                 .Select(proxyServer =>
                     new ProxyServer
                     {
-                        NormalizedName = proxyServer.NormalizedName,
-                        Protocol = proxyServer.Protocol,
+                        NormalizedName    = proxyServer.NormalizedName,
+                        Protocol          = proxyServer.Protocol,
                         HostnameOrAddress = proxyServer.HostnameOrAddress,
-                        Port = proxyServer.Port,
-                        Credentials = proxyServer.Credentials is not null
+                        Port              = proxyServer.Port,
+                        Credentials       = proxyServer.Credentials is not null
                             ? new ProxyServerCredentials
                             {
                                 Username = proxyServer.Credentials.Username,
@@ -75,18 +77,21 @@ public class ProxyServerService : IProxyServerService
             
             _proxyServerRepository.AddRange(newProxyServers);
 
-            var messages = newProxyServers
+            var outboxMessages = newProxyServers
                 .Select(proxyServer => new ProxyServerFoundEvent
                 {
                     ProxyServerId = proxyServer.Id,
                 })
+                .Select(@event => @event.ToOutboxMessage())
                 .ToArray();
             
-            _outboxMessageRepository.AddRange(messages);
+            _outboxMessageRepository.AddRange(outboxMessages);
             
             await _unitOfWork.SaveChangesAsync(ct);
             
             await transaction.CommitAsync(ct);
+            
+            outboxMessages.ForEach(message => message.Dispose());
 
             return AppResult.Success();
         }
@@ -112,7 +117,7 @@ public class ProxyServerService : IProxyServerService
         await _proxyServerRepository.DisposeAsync();
         await _outboxMessageRepository.DisposeAsync();
         await _unitOfWork.DisposeAsync();
-        
+
         GC.SuppressFinalize(this);
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Text.Json;
 using Messaging.Abstracts;
-using Messaging.Outbox.Abstracts;
 
-namespace Messaging.Outbox.EntityFramework.Extensions;
+namespace Messaging.Outbox.Abstracts.Extensions;
 
 public static class MessageExtensions
 {

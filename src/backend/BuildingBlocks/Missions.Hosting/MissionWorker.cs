@@ -53,7 +53,7 @@ public class MissionWorker<TMission> : BackgroundService
             await _missionDelay.IntervalDelayAsync(stoppingToken);
         }
         
-        Logger.LogInformation("Mission worker stopped Type: {MissionType}", typeof(TMission).Name);
+        Logger.LogInformation("Mission worker finished Type: {MissionType}", typeof(TMission).Name);
     }
 
     protected virtual async Task RunMissionAsync(IMission mission, CancellationToken ct = default)

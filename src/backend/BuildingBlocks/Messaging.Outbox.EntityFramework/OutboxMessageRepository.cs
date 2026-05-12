@@ -2,6 +2,7 @@
 using Database.EntityFramework.Repositories;
 using Messaging.Abstracts;
 using Messaging.Outbox.Abstracts;
+using Messaging.Outbox.Abstracts.Extensions;
 using Messaging.Outbox.EntityFramework.Extensions;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
