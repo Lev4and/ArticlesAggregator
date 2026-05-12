@@ -7,7 +7,9 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/ProxyServerSearcher.csproj", "src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/"]
+COPY ["Directory.Packages.props", "Directory.Packages.props"]
+COPY ["src/backend/BuildingBlocks/", "src/backend/BuildingBlocks/"]
+COPY ["src/backend/Services/ProxyServerSearcher/", "src/backend/Services/ProxyServerSearcher/"]
 RUN dotnet restore "src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/ProxyServerSearcher.csproj"
 COPY . .
 WORKDIR "/src/src/backend/Services/ProxyServerSearcher/ProxyServerSearcher"

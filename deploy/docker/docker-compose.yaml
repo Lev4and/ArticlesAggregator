@@ -184,126 +184,170 @@ services:
         failure_action: rollback
         delay: 10s
 
-  minio:
-    image: bitnamilegacy/minio:2025.4.8
-    container_name: minio
-    restart: always
-    command: server --address "0.0.0.0:9000" --console-address "0.0.0.0:9001" /data
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_PROMETHEUS_AUTH_TYPE: "public"
-    volumes:
-      - ./data/minio/data:/data
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    networks:
-      - minio-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
+#  minio:
+#    image: bitnamilegacy/minio:2025.4.8
+#    container_name: minio
+#    restart: always
+#    command: server --address "0.0.0.0:9000" --console-address "0.0.0.0:9001" /data
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+#    logging: *default-logging
+#    environment:
+#      MINIO_ROOT_USER: minioadmin
+#      MINIO_ROOT_PASSWORD: minioadmin
+#      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+#    volumes:
+#      - ./data/minio/data:/data
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    networks:
+#      - minio-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.3.2
-    container_name: keycloak
-    command:
-      - start-dev
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:26.3.2
+#    container_name: keycloak
+#    command:
+#      - start-dev
+#    restart: always
+##    healthcheck:
+##      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/live" ]
+##      interval: 5s
+##      timeout: 30s
+##      retries: 5
+#    logging: *default-logging
+#    depends_on:
+#      - keycloak-postgres
+#    environment:
+#      KC_DB: postgres
+#      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+#      KC_DB_SCHEMA: public
+#      KC_DB_USERNAME: postgres
+#      KC_DB_PASSWORD: postgres
+#      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+#      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+#    ports:
+#      - "8090:8080"
+#    expose:
+#      - "9000"
+#    networks:
+#      - keycloak-network
+#      - keycloak-postgres-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+#
+#  keycloak-postgres:
+#    image: postgres:18.3
+#    container_name: keycloak-postgres
+#    restart: always
+#    healthcheck:
+#      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+#    logging: *default-logging
+#    environment:
+#      POSTGRES_DB: keycloak
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    volumes:
+#      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/docker
+#    ports:
+#      - "20001:5432"
+#    networks:
+#      - keycloak-postgres-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+#  
+#  keycloak-postgres-exporter:
+#    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
+#    container_name: keycloak-postgres-exporter
+#    restart: always
+#    healthcheck:
+#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+#    logging: *default-logging
+#    depends_on:
+#      - keycloak-postgres
+#    environment:
+#      DATA_SOURCE_NAME: "postgresql://postgres:postgres@keycloak-postgres:5432/keycloak?sslmode=disable"
+#    expose:
+#      - "9187"
+#    networks:
+#      - keycloak-postgres-exporter-network
+#      - keycloak-postgres-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
+        
+  proxy-server-searcher:
+    image: ${DOCKER_REGISTRY-}proxy-server-searcher
+    build:
+      context: ../../
+      dockerfile: src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/Dockerfile
+    container_name: proxy-server-searcher
     restart: always
 #    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/live" ]
+#      test: curl -f http://localhost:8080/health
 #      interval: 5s
 #      timeout: 30s
 #      retries: 5
     logging: *default-logging
     depends_on:
-      - keycloak-postgres
+      - proxy-server-searcher-postgres
     environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
-      KC_DB_SCHEMA: public
-      KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: postgres
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    ports:
-      - "8090:8080"
-    expose:
-      - "9000"
-    networks:
-      - keycloak-network
-      - keycloak-postgres-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-
-  keycloak-postgres:
-    image: postgres:18.3
-    container_name: keycloak-postgres
-    restart: always
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: postgres
+      ASPNETCORE_ENVIRONMENT: Development
+      DATABASE_TYPE: Postgres
+      POSTGRES_HOST: proxy-server-searcher-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: proxy-server-searcher
+      POSTGRES_USERNAME: postgres
       POSTGRES_PASSWORD: postgres
-    volumes:
-      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/docker
-    ports:
-      - "20001:5432"
-    networks:
-      - keycloak-postgres-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
-  
-  keycloak-postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
-    container_name: keycloak-postgres-exporter
-    restart: always
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    depends_on:
-      - keycloak-postgres
-    environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:postgres@keycloak-postgres:5432/keycloak?sslmode=disable"
+      PULSAR_URL: pulsar://pulsar:6650
+      OPENTELEMETRY_COLLECTOR_GRPC_URL: http://opentelemetry-collector-agent:4317
+      HTTP_PORT: 30001
+      GRPC_PORT: 30002
     expose:
-      - "9187"
+      - "30001"
+      - "30002"
     networks:
-      - keycloak-postgres-exporter-network
-      - keycloak-postgres-network
+      - proxy-server-searcher-network
+      - proxy-server-searcher-postgres-network
+      - pulsar-network
+      - opentelemetry-collector-agent-network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 2
       update_config:
         parallelism: 1
         order: start-first
@@ -352,7 +396,7 @@ services:
     depends_on:
       - proxy-server-searcher-postgres
     environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:postgres@proxy-server-searcher-postgres:5432/keycloak?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@proxy-server-searcher-postgres:5432/proxy-server-searcher?sslmode=disable"
     expose:
       - "9187"
     networks:
@@ -692,6 +736,8 @@ networks:
   keycloak-postgres-network:
     driver: overlay
   keycloak-postgres-exporter-network:
+    driver: overlay
+  proxy-server-searcher-network:
     driver: overlay
   proxy-server-searcher-postgres-network:
     driver: overlay
