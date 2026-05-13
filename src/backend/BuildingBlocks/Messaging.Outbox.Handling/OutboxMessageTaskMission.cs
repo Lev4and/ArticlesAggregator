@@ -1,4 +1,5 @@
 ﻿using Messaging.Outbox.Abstracts;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using StoredTasks.Database.Abstracts;
@@ -17,9 +18,8 @@ public class OutboxMessageTaskMission : StoredTaskMission<OutboxMessage>
     public OutboxMessageTaskMission(
         ITracer<StoredTaskMission<OutboxMessage>> tracer, 
         ILogger<StoredTaskMission<OutboxMessage>> logger, 
-        IStoredTaskRepository<OutboxMessage> repository, 
-        IServiceProvider serviceProvider) : 
-        base(tracer, logger, repository, serviceProvider)
+        IServiceScopeFactory serviceScopeFactory) : 
+        base(tracer, logger, serviceScopeFactory)
     {
         
     }

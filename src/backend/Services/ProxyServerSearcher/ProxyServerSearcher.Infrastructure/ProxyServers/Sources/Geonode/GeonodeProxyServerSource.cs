@@ -56,11 +56,11 @@ public class GeonodeProxyServerSource : IProxyServerSource
             yield return pagedResult.Data
                 .Select(proxyServer => new ProxyServerDto
                 {
-                    Protocol = Enum.GetValues<ProxyServerProtocol>().First(protocol =>
+                    Protocol          = Enum.GetValues<ProxyServerProtocol>().First(protocol =>
                         string.Equals(protocol.ToString(), proxyServer.Protocols.ElementAt(0),
                             StringComparison.CurrentCultureIgnoreCase)),
                     HostnameOrAddress = proxyServer.Host,
-                    Port = proxyServer.Port
+                    Port              = proxyServer.Port
                 })
                 .ToArray();
         } 

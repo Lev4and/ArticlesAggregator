@@ -310,49 +310,49 @@ services:
 #        failure_action: rollback
 #        delay: 10s
         
-  proxy-server-searcher:
-    image: ${DOCKER_REGISTRY-}proxy-server-searcher
-    build:
-      context: ../../
-      dockerfile: src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/Dockerfile
-    container_name: proxy-server-searcher
-    restart: always
-#    healthcheck:
-#      test: curl -f http://localhost:8080/health
-#      interval: 5s
-#      timeout: 30s
-#      retries: 5
-    logging: *default-logging
-    depends_on:
-      - proxy-server-searcher-postgres
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      DATABASE_TYPE: Postgres
-      POSTGRES_HOST: proxy-server-searcher-postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: proxy-server-searcher
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: postgres
-      PULSAR_URL: pulsar://pulsar:6650
-      OPENTELEMETRY_COLLECTOR_GRPC_URL: http://opentelemetry-collector-agent:4317
-      HTTP_PORT: 30001
-      GRPC_PORT: 30002
-    expose:
-      - "30001"
-      - "30002"
-    networks:
-      - proxy-server-searcher-network
-      - proxy-server-searcher-postgres-network
-      - pulsar-network
-      - opentelemetry-collector-agent-network
-    deploy:
-      mode: replicated
-      replicas: 2
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
+#  proxy-server-searcher:
+#    image: ${DOCKER_REGISTRY-}proxy-server-searcher
+#    build:
+#      context: ../../
+#      dockerfile: src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/Dockerfile
+#    container_name: proxy-server-searcher
+#    restart: always
+##    healthcheck:
+##      test: curl -f http://localhost:8080/health
+##      interval: 5s
+##      timeout: 30s
+##      retries: 5
+#    logging: *default-logging
+#    depends_on:
+#      - proxy-server-searcher-postgres
+#    environment:
+#      ASPNETCORE_ENVIRONMENT: Development
+#      DATABASE_TYPE: Postgres
+#      POSTGRES_HOST: proxy-server-searcher-postgres
+#      POSTGRES_PORT: 5432
+#      POSTGRES_DATABASE: proxy-server-searcher
+#      POSTGRES_USERNAME: postgres
+#      POSTGRES_PASSWORD: postgres
+#      PULSAR_URL: pulsar://pulsar:6650
+#      OPENTELEMETRY_COLLECTOR_GRPC_URL: http://opentelemetry-collector-agent:4317
+#      HTTP_PORT: 30001
+#      GRPC_PORT: 30002
+#    expose:
+#      - "30001"
+#      - "30002"
+#    networks:
+#      - proxy-server-searcher-network
+#      - proxy-server-searcher-postgres-network
+#      - pulsar-network
+#      - opentelemetry-collector-agent-network
+#    deploy:
+#      mode: replicated
+#      replicas: 2
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
   
   proxy-server-searcher-postgres:
     image: postgres:18.3
@@ -540,39 +540,39 @@ services:
         failure_action: rollback
         delay: 10s
   
-  jaeger:
-    image: jaegertracing/all-in-one:1.71.0
-    container_name: jaeger
-    restart: always
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:14269" ]
-      interval: 5s
-      timeout: 30s
-      retries: 5
-    logging: *default-logging
-    environment:
-      SPAN_STORAGE_TYPE: badger
-      BADGER_EPHEMERAL: "false"
-      BADGER_DIRECTORY_VALUE: /badger/data
-      BADGER_DIRECTORY_KEY: /badger/key
-    volumes:
-      - ./data/jaeger:/badger
-    ports:
-      - "16686:16686"
-    expose:
-      - "4317"
-      - "4318"
-      - "14269"
-    networks:
-      - jaeger-network
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        parallelism: 1
-        order: start-first
-        failure_action: rollback
-        delay: 10s
+#  jaeger:
+#    image: jaegertracing/all-in-one:1.71.0
+#    container_name: jaeger
+#    restart: always
+#    healthcheck:
+#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:14269" ]
+#      interval: 5s
+#      timeout: 30s
+#      retries: 5
+#    logging: *default-logging
+#    environment:
+#      SPAN_STORAGE_TYPE: badger
+#      BADGER_EPHEMERAL: "false"
+#      BADGER_DIRECTORY_VALUE: /badger/data
+#      BADGER_DIRECTORY_KEY: /badger/key
+#    volumes:
+#      - ./data/jaeger:/badger
+#    ports:
+#      - "16686:16686"
+#    expose:
+#      - "4317"
+#      - "4318"
+#      - "14269"
+#    networks:
+#      - jaeger-network
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      update_config:
+#        parallelism: 1
+#        order: start-first
+#        failure_action: rollback
+#        delay: 10s
   
   node-exporter:
     image: prom/node-exporter:v1.9.1

@@ -36,7 +36,8 @@ public class ProxyVerityClient : IDisposable
         
         try
         {
-            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, ct);
+            var httpResponseMessage =
+                await _httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 var responseStream = await httpResponseMessage.Content.ReadAsStreamAsync(ct);

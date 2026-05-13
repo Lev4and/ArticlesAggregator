@@ -62,10 +62,12 @@ public static class ServiceCollectionExtensions
                     options.EnableDetailedErrors();
                 }
 
-                if (configuration.EnableSensitiveDataLogging)
-                {
-                    options.EnableSensitiveDataLogging();
-                }
+                // if (configuration.EnableSensitiveDataLogging)
+                // {
+                //     options.EnableSensitiveDataLogging();
+                // }
+
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
             
             assembliesTypes

@@ -97,6 +97,8 @@ public class ProxyServerService : IProxyServerService
         }
         catch (Exception exception)
         {
+            await transaction.RollbackAsync(ct);
+            
             _logger.LogError(exception, "Create batch proxy server failed");
             
             return AppResult.Failure(AppErrorType.Failed, exception.Message);

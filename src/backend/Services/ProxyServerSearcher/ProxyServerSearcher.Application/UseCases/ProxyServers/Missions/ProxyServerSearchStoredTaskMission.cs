@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerSearcher.Domain.Entities;
 using StoredTasks.Database.Abstracts;
@@ -17,9 +18,8 @@ public class ProxyServerSearchStoredTaskMission : StoredTaskMission<ProxyServerS
     public ProxyServerSearchStoredTaskMission(
         ITracer<StoredTaskMission<ProxyServerSearchStoredTask>> tracer, 
         ILogger<StoredTaskMission<ProxyServerSearchStoredTask>> logger, 
-        IStoredTaskRepository<ProxyServerSearchStoredTask> repository, 
-        IServiceProvider serviceProvider) : 
-        base(tracer, logger, repository, serviceProvider)
+        IServiceScopeFactory serviceScopeFactory) : 
+        base(tracer, logger, serviceScopeFactory)
     {
         
     }

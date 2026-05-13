@@ -30,13 +30,14 @@ public class HideMyNameClient : IDisposable
 
         var httpRequestMessage = new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
+            Method     = HttpMethod.Get,
             RequestUri = new Uri($"proxy-list/?start={offset}#list", UriKind.Relative)
         };
 
         try
         {
-            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, ct);
+            var httpResponseMessage =
+                await _httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 var responseStream = await httpResponseMessage.Content.ReadAsStreamAsync(ct);

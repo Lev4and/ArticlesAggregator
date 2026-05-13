@@ -50,7 +50,7 @@ public class HideMyNameProxyServerSource : IProxyServerSource
 
             await using var htmlPageContent = htmlPageResult.Result!;
             
-            using var htmlDocument = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
+            using var htmlDocument    = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
             var htmlDocumentNavigator = htmlDocument.CreateNavigator();
 
             var nextPageLink = 
@@ -85,8 +85,8 @@ public class HideMyNameProxyServerSource : IProxyServerSource
                 "//div[contains(@class, 'table_block')]//tbody/tr"))
             {
                 var hostnameOrAddress = tableRowNode.ChildNodes.ElementAt(0).TextContent;
-                var port                = int.Parse(tableRowNode.ChildNodes.ElementAt(1).TextContent);
-                var protocol               = Enum.GetValues<ProxyServerProtocol>().First(protocol => 
+                var port              = int.Parse(tableRowNode.ChildNodes.ElementAt(1).TextContent);
+                var protocol          = Enum.GetValues<ProxyServerProtocol>().First(protocol => 
                     string.Equals(
                         protocol.ToString(), 
                         tableRowNode.ChildNodes.ElementAt(4).TextContent.Split(", ").First(), 

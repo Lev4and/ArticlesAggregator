@@ -32,17 +32,24 @@ public class FreeProxyListClient : IDisposable
 
         var httpClientRequest = new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
+            Method     = HttpMethod.Get,
             RequestUri = new Uri("proxies/all/data.json", UriKind.Relative),
         };
 
         try
         {
-            var httpResponseMessage = await _httpClient.SendAsync(httpClientRequest, ct);
+            var httpResponseMessage = 
+                await _httpClient.SendAsync(httpClientRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                var responseJson = await httpResponseMessage.Content.ReadAsStringAsync(ct);
-                var proxyServers = JsonConvert.DeserializeObject<ApiProxyServer[]>(responseJson) ?? [];
+                var jsonSerializer = new JsonSerializer();
+                
+                await using var httpResponseStream = await httpResponseMessage.Content.ReadAsStreamAsync(ct);
+                
+                using var streamReader         = new StreamReader(httpResponseStream);
+                await using var jsonTextReader = new JsonTextReader(streamReader);
+                
+                var proxyServers = jsonSerializer.Deserialize<ApiProxyServer[]>(jsonTextReader) ?? [];
                 
                 return AppResult<ApiProxyServer[]>.Success(proxyServers);
             }

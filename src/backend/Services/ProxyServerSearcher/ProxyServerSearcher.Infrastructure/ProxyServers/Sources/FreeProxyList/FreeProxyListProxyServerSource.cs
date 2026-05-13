@@ -40,11 +40,11 @@ public class FreeProxyListProxyServerSource : IProxyServerSource
             yield return listResult.Result!
                 .Select(proxyServer => new ProxyServerDto
                 {
-                    Protocol = Enum.GetValues<ProxyServerProtocol>().First(protocol =>
+                    Protocol          = Enum.GetValues<ProxyServerProtocol>().First(protocol =>
                         string.Equals(protocol.ToString(), proxyServer.Protocol,
                             StringComparison.CurrentCultureIgnoreCase)),
                     HostnameOrAddress = proxyServer.Host,
-                    Port = proxyServer.Port
+                    Port              = proxyServer.Port
                 })
                 .ToImmutableList();
         }

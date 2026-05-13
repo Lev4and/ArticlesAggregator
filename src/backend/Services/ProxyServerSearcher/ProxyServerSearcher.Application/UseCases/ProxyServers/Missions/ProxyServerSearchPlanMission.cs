@@ -71,6 +71,8 @@ public class ProxyServerSearchPlanMission : IMission
         }
         catch (Exception exception)
         {
+            await transaction.RollbackAsync(ct);
+            
             _logger.LogError(exception, "Proxy server search plan mission failed");
         }
     }

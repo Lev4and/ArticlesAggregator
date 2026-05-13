@@ -50,7 +50,7 @@ public class ProxyManiaProxyServerSource : IProxyServerSource
 
             await using var htmlPageContent = htmlPageResult.Result!;
             
-            using var htmlDocument = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
+            using var htmlDocument    = await _htmlParser.ParseDocumentAsync(htmlPageContent, ct);
             var htmlDocumentNavigator = htmlDocument.CreateNavigator();
             
             var pageNumberText = 
@@ -79,8 +79,8 @@ public class ProxyManiaProxyServerSource : IProxyServerSource
                 if (!match.Success) continue;
             
                 var hostnameOrAddress = match.Groups["host"].Value;
-                var port                = int.Parse(match.Groups["port"].Value);
-                var protocol               = Enum.GetValues<ProxyServerProtocol>().First(protocol => 
+                var port              = int.Parse(match.Groups["port"].Value);
+                var protocol          = Enum.GetValues<ProxyServerProtocol>().First(protocol => 
                     string.Equals(protocol.ToString(), protocolContent, StringComparison.CurrentCultureIgnoreCase));
             
                 var proxyServer = new ProxyServerDto

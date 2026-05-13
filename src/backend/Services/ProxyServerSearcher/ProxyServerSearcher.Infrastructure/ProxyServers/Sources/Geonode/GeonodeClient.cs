@@ -24,7 +24,7 @@ public class GeonodeClient : IDisposable
     }
 
     public async Task<AppResult<ApiPagedResult<ApiProxyServer>>> GetProxyServerListAsync(int page = 1,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         using var operation = _tracer.StartOperation($"Get proxy server list ({ProxyServerSourceConstants.Geonode})");
         
@@ -39,11 +39,18 @@ public class GeonodeClient : IDisposable
         
         try
         {
-            var httpResponseMessage = await _httpClient.SendAsync(httpClientRequest, cancellationToken);
+            var httpResponseMessage = 
+                await _httpClient.SendAsync(httpClientRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                var responseJson = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
-                var proxyServers = JsonConvert.DeserializeObject<ApiPagedResult<ApiProxyServer>>(responseJson) 
+                var jsonSerializer = new JsonSerializer();
+                
+                await using var httpResponseStream = await httpResponseMessage.Content.ReadAsStreamAsync(ct);
+                
+                using var streamReader         = new StreamReader(httpResponseStream);
+                await using var jsonTextReader = new JsonTextReader(streamReader);
+
+                var proxyServers = jsonSerializer.Deserialize<ApiPagedResult<ApiProxyServer>>(jsonTextReader)
                     ?? new ApiPagedResult<ApiProxyServer>([], 1, 0, 0);
                 
                 return AppResult<ApiPagedResult<ApiProxyServer>>.Success(proxyServers);

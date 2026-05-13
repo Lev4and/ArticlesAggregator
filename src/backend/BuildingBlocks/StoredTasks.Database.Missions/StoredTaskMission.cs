@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Missions.Abstracts;
 using Observability.Abstracts;
 using StoredTasks.Abstracts;
@@ -11,8 +12,7 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
 {
     protected readonly ITracer<StoredTaskMission<TStoredTask>> Tracer;
     protected readonly ILogger<StoredTaskMission<TStoredTask>> Logger;
-    protected readonly IStoredTaskRepository<TStoredTask>      Repository;
-    protected readonly IServiceProvider                        ServiceProvider;
+    protected readonly IServiceScopeFactory                    ServiceScopeFactory;
     
     protected virtual int TaskLimit => 10;
 
@@ -25,13 +25,11 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
     public StoredTaskMission(
         ITracer<StoredTaskMission<TStoredTask>> tracer,
         ILogger<StoredTaskMission<TStoredTask>> logger,
-        IStoredTaskRepository<TStoredTask>      repository, 
-        IServiceProvider                        serviceProvider)
+        IServiceScopeFactory                    serviceScopeFactory)
     {
-        Tracer          = tracer;
-        Logger          = logger;
-        Repository      = repository;
-        ServiceProvider = serviceProvider;
+        Tracer              = tracer;
+        Logger              = logger;
+        ServiceScopeFactory = serviceScopeFactory;
     }
     
     public virtual async Task RunAsync(CancellationToken ct = default)
@@ -53,11 +51,14 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
         
         while (!ct.IsCancellationRequested)
         {
-            await Repository.MarkExpiredTasksAsFailedAsync(ct);
+            await using var scope      = ServiceScopeFactory.CreateAsyncScope();
+            await using var repository = scope.ServiceProvider.GetRequiredService<IStoredTaskRepository<TStoredTask>>();
             
-            await Repository.CaptureTasksAsync(workerId, DateTime.UtcNow.Add(AttemptDuration), TaskLimit, ct);
+            await repository.MarkExpiredTasksAsFailedAsync(ct);
             
-            var capturedTasks = await Repository.GetCapturedTasksAsync(workerId, TaskLimit, ct);
+            await repository.CaptureTasksAsync(workerId, DateTime.UtcNow.Add(AttemptDuration), TaskLimit, ct);
+            
+            var capturedTasks = await repository.GetCapturedTasksAsync(workerId, TaskLimit, ct);
             if (capturedTasks.Count == 0)
             {
                 if (IntervalDelay is not null)
@@ -72,13 +73,13 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
             {
                 Logger.LogInformation("Stored task handle Id: {StoredTaskId}", capturedTask.Id);
                 
-                var storedTaskHandler = (IStoredTaskHandler?)ServiceProvider.GetService(typeof(IStoredTaskHandler<TStoredTask>));
+                var storedTaskHandler = (IStoredTaskHandler?)scope.ServiceProvider.GetService(typeof(IStoredTaskHandler<TStoredTask>));
                 if (storedTaskHandler is null)
                 {
                     Logger.LogError("Stored task handler not found Id: {StoredTaskId} Type: {StoredTaskType}",
                         capturedTask.Id, typeof(TStoredTask).Name);
                     
-                    await Repository.MarkTaskAsFailedAsync(capturedTask.Id, ct);
+                    await repository.MarkTaskAsFailedAsync(capturedTask.Id, ct);
                     
                     continue;
                 }
@@ -91,7 +92,7 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
                         Logger.LogInformation("Stored task handle successfully completed Id: {StoredTaskId}",
                             capturedTask.Id);
                         
-                        await Repository.MarkTaskAsCompletedAsync(capturedTask.Id, ct);
+                        await repository.MarkTaskAsCompletedAsync(capturedTask.Id, ct);
                     }
                     else
                     {
@@ -115,15 +116,13 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
 
     public void Dispose()
     {
-        Repository.Dispose();
-        
         GC.SuppressFinalize(this);
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        await Repository.DisposeAsync();
-        
         GC.SuppressFinalize(this);
+        
+        return ValueTask.CompletedTask;
     }
 }
