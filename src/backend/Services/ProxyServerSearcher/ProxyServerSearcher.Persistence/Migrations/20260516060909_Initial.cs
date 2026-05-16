@@ -205,6 +205,16 @@ namespace ProxyServerSearcher.Persistence.Migrations
                 column: "created_at");
 
             migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_credentials_password",
+                table: "proxy_servers",
+                column: "credentials_password");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_proxy_servers_credentials_username",
+                table: "proxy_servers",
+                column: "credentials_username");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_proxy_servers_deleted_at",
                 table: "proxy_servers",
                 column: "deleted_at");

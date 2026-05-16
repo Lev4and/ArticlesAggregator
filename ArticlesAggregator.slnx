@@ -48,6 +48,14 @@
     <Project Path="src/backend/BuildingBlocks/StoredTasks.Database.Missions/StoredTasks.Database.Missions.csproj" />
   </Folder>
   <Folder Name="/src/backend/Services/" />
+  <Folder Name="/src/backend/Services/ProxyServerAggregator/">
+    <Project Path="src/backend/Services/ProxyServerAggregator/ProxyServerAggregator.Application/ProxyServerAggregator.Application.csproj" />
+    <Project Path="src/backend/Services/ProxyServerAggregator/ProxyServerAggregator.Domain/ProxyServerAggregator.Domain.csproj" />
+    <Project Path="src/backend/Services/ProxyServerAggregator/ProxyServerAggregator.Infrastructure/ProxyServerAggregator.Infrastructure.csproj" />
+    <Project Path="src/backend/Services/ProxyServerAggregator/ProxyServerAggregator.Persistence/ProxyServerAggregator.Persistence.csproj" />
+    <Project Path="src/backend/Services/ProxyServerAggregator/ProxyServerAggregator.Presentation/ProxyServerAggregator.Presentation.csproj" />
+    <Project Path="src/backend/Services/ProxyServerAggregator/ProxyServerAggregator/ProxyServerAggregator.csproj" />
+  </Folder>
   <Folder Name="/src/backend/Services/ProxyServerSearcher/">
     <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Application/ProxyServerSearcher.Application.csproj" />
     <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Domain/ProxyServerSearcher.Domain.csproj" />

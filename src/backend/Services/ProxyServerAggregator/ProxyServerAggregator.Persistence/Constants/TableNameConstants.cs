@@ -1,0 +1,8 @@
+﻿namespace ProxyServerAggregator.Persistence.Constants;
+
+public class TableNameConstants
+{
+    public const string ProxyServers            = "proxy_servers";
+    public const string ProxyServerTestRequests = "proxy_server_test_requests";
+    public const string OutboxMessages          = "outbox_messages";
+}

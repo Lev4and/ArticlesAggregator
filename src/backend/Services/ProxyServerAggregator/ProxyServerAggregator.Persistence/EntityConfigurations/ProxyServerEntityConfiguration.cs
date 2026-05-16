@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ProxyServerSearcher.Domain.Entities;
-using ProxyServerSearcher.Persistence.Constants;
+using ProxyServerAggregator.Domain.Entities;
+using ProxyServerAggregator.Persistence.Constants;
 
-namespace ProxyServerSearcher.Persistence.EntityConfigurations;
+namespace ProxyServerAggregator.Persistence.EntityConfigurations;
 
 public class ProxyServerEntityConfiguration : IEntityTypeConfiguration<ProxyServer>
 {
@@ -28,5 +28,10 @@ public class ProxyServerEntityConfiguration : IEntityTypeConfiguration<ProxyServ
         builder.HasIndex(e => e.IsDeleted);
         builder.HasIndex(e => e.DeletedAt);
         builder.HasQueryFilter(e => !e.IsDeleted);
+        builder
+            .HasMany(e => e.TestRequests)
+            .WithOne(e => e.Server)
+            .HasPrincipalKey(e => e.Id)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

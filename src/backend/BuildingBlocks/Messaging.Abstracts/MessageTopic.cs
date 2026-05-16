@@ -2,5 +2,7 @@
 
 public enum MessageTopic
 {
-    ProxyServerEvents
+    ProxyServerEvents,
+    ProxyServerTestEvents,
+    ProxyServerTestResultEvents
 }

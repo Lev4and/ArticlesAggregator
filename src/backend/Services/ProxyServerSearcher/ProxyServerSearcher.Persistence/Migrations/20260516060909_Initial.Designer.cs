@@ -13,7 +13,7 @@ using ProxyServerSearcher.Persistence;
 namespace ProxyServerSearcher.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260511075610_Initial")]
+    [Migration("20260516060909_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -302,7 +302,7 @@ namespace ProxyServerSearcher.Persistence.Migrations
 
             modelBuilder.Entity("ProxyServerSearcher.Domain.Entities.ProxyServer", b =>
                 {
-                    b.OwnsOne("ProxyServerSearcher.Domain.ValueObjects.ProxyServerCredentials", "Credentials", b1 =>
+                    b.OwnsOne("Messaging.Messages.ProxyServerEvents.Models.ProxyServerCredentials", "Credentials", b1 =>
                         {
                             b1.Property<Guid>("ProxyServerId")
                                 .HasColumnType("uuid")
@@ -319,6 +319,12 @@ namespace ProxyServerSearcher.Persistence.Migrations
                                 .HasColumnName("credentials_username");
 
                             b1.HasKey("ProxyServerId");
+
+                            b1.HasIndex("Password")
+                                .HasDatabaseName("ix_proxy_servers_credentials_password");
+
+                            b1.HasIndex("Username")
+                                .HasDatabaseName("ix_proxy_servers_credentials_username");
 
                             b1.ToTable("proxy_servers");
 

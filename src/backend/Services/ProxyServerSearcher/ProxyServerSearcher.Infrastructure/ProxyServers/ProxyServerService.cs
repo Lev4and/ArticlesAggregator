@@ -18,20 +18,20 @@ public class ProxyServerService : IProxyServerService
 {
     private readonly ITracer<ProxyServerService> _tracer;
     private readonly ILogger<ProxyServerService> _logger;
-    private readonly IProxyServerRepository      _proxyServerRepository;
     private readonly IOutboxMessageRepository    _outboxMessageRepository;
+    private readonly IProxyServerRepository      _repository;
     private readonly IUnitOfWork                 _unitOfWork;
     
     public ProxyServerService(
         ITracer<ProxyServerService> tracer, 
         ILogger<ProxyServerService> logger, 
-        IProxyServerRepository      proxyServerRepository,
         IOutboxMessageRepository    outboxMessageRepository,
+        IProxyServerRepository      repository,
         IUnitOfWork                 unitOfWork)
     {
         _tracer                  = tracer;
         _logger                  = logger;
-        _proxyServerRepository   = proxyServerRepository;
+        _repository              = repository;
         _outboxMessageRepository = outboxMessageRepository;
         _unitOfWork              = unitOfWork;
     }
@@ -46,7 +46,7 @@ public class ProxyServerService : IProxyServerService
             .Select(proxyServer => proxyServer.NormalizedName)
                 .ToArray();
         
-        var oldProxyServers = await _proxyServerRepository.GetExistsAsync(proxyServerNames, ct);
+        var oldProxyServers = await _repository.GetExistsAsync(proxyServerNames, ct);
         if (oldProxyServers.Count > 0)
         {
             _logger.LogWarning("Some proxy servers already exist Count: {ProxyServerCount}", oldProxyServers.Count);
@@ -75,7 +75,7 @@ public class ProxyServerService : IProxyServerService
                     })
                 .ToArray();
             
-            _proxyServerRepository.AddRange(newProxyServers);
+            _repository.AddRange(newProxyServers);
 
             var outboxMessages = newProxyServers
                 .Select(proxyServer => new ProxyServerFoundEvent
@@ -112,8 +112,8 @@ public class ProxyServerService : IProxyServerService
 
     public void Dispose()
     {
-        _proxyServerRepository.Dispose();
         _outboxMessageRepository.Dispose();
+        _repository.Dispose();
         _unitOfWork.Dispose();
         
         GC.SuppressFinalize(this);
@@ -121,8 +121,8 @@ public class ProxyServerService : IProxyServerService
 
     public async ValueTask DisposeAsync()
     {
-        await _proxyServerRepository.DisposeAsync();
         await _outboxMessageRepository.DisposeAsync();
+        await _repository.DisposeAsync();
         await _unitOfWork.DisposeAsync();
 
         GC.SuppressFinalize(this);

@@ -3,18 +3,21 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using ProxyServerSearcher.Persistence;
+using ProxyServerAggregator.Persistence;
 
 #nullable disable
 
-namespace ProxyServerSearcher.Persistence.Migrations
+namespace ProxyServerAggregator.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260516071838_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,7 +120,7 @@ namespace ProxyServerSearcher.Persistence.Migrations
                     b.ToTable("outbox_messages", (string)null);
                 });
 
-            modelBuilder.Entity("ProxyServerSearcher.Domain.Entities.ProxyServer", b =>
+            modelBuilder.Entity("ProxyServerAggregator.Domain.Entities.ProxyServer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -197,107 +200,89 @@ namespace ProxyServerSearcher.Persistence.Migrations
                     b.ToTable("proxy_servers", (string)null);
                 });
 
-            modelBuilder.Entity("ProxyServerSearcher.Domain.Entities.ProxyServerSearchStoredTask", b =>
+            modelBuilder.Entity("ProxyServerAggregator.Domain.Entities.ProxyServerTestRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("AttemptDeadline")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("attempt_deadline");
-
-                    b.Property<int>("Attempts")
-                        .HasColumnType("integer")
-                        .HasColumnName("attempts");
-
-                    b.Property<int?>("AttemptsRemaining")
-                        .HasColumnType("integer")
-                        .HasColumnName("attempts_remaining");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime?>("Deadline")
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deadline");
+                        .HasColumnName("deleted_at");
 
                     b.Property<string>("EntityState")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("entity_state");
 
-                    b.Property<DateTime>("PlannedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("planned_at");
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text")
+                        .HasColumnName("error_message");
 
-                    b.Property<string>("SourceName")
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<Guid>("ProxyServerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proxy_server_id");
+
+                    b.Property<long?>("RequestTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("request_time");
+
+                    b.Property<long?>("ResponseTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("response_time");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("source_name");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("state");
+                        .HasColumnName("status");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("WorkerId")
-                        .HasColumnType("text")
-                        .HasColumnName("worker_id");
-
                     b.HasKey("Id")
-                        .HasName("pk_proxy_server_search_stored_tasks");
-
-                    b.HasIndex("AttemptDeadline")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_attempt_deadline");
-
-                    b.HasIndex("Attempts")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_attempts");
-
-                    b.HasIndex("AttemptsRemaining")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_attempts_remaining");
+                        .HasName("pk_proxy_server_test_requests");
 
                     b.HasIndex("CreatedAt")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_created_at");
+                        .HasDatabaseName("ix_proxy_server_test_requests_created_at");
 
-                    b.HasIndex("Deadline")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_deadline");
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("ix_proxy_server_test_requests_deleted_at");
 
                     b.HasIndex("EntityState")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_entity_state");
+                        .HasDatabaseName("ix_proxy_server_test_requests_entity_state");
 
-                    b.HasIndex("PlannedAt")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_planned_at");
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("ix_proxy_server_test_requests_is_deleted");
 
-                    b.HasIndex("SourceName")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_source_name");
+                    b.HasIndex("ProxyServerId")
+                        .HasDatabaseName("ix_proxy_server_test_requests_proxy_server_id");
 
-                    b.HasIndex("State")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_state");
+                    b.HasIndex("RequestTime")
+                        .HasDatabaseName("ix_proxy_server_test_requests_request_time");
+
+                    b.HasIndex("ResponseTime")
+                        .HasDatabaseName("ix_proxy_server_test_requests_response_time");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_proxy_server_test_requests_status");
 
                     b.HasIndex("UpdatedAt")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_updated_at");
+                        .HasDatabaseName("ix_proxy_server_test_requests_updated_at");
 
-                    b.HasIndex("WorkerId")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_worker_id");
-
-                    b.HasIndex("SourceName", "PlannedAt")
-                        .IsUnique()
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_source_name_planned_at");
-
-                    b.HasIndex("State", "AttemptDeadline", "AttemptsRemaining", "Deadline")
-                        .HasDatabaseName("ix_proxy_server_search_stored_tasks_state_attempt_deadline_att");
-
-                    b.ToTable("proxy_server_search_stored_tasks", (string)null);
+                    b.ToTable("proxy_server_test_requests", (string)null);
                 });
 
-            modelBuilder.Entity("ProxyServerSearcher.Domain.Entities.ProxyServer", b =>
+            modelBuilder.Entity("ProxyServerAggregator.Domain.Entities.ProxyServer", b =>
                 {
                     b.OwnsOne("Messaging.Messages.ProxyServerEvents.Models.ProxyServerCredentials", "Credentials", b1 =>
                         {
@@ -331,6 +316,23 @@ namespace ProxyServerSearcher.Persistence.Migrations
                         });
 
                     b.Navigation("Credentials");
+                });
+
+            modelBuilder.Entity("ProxyServerAggregator.Domain.Entities.ProxyServerTestRequest", b =>
+                {
+                    b.HasOne("ProxyServerAggregator.Domain.Entities.ProxyServer", "Server")
+                        .WithMany("TestRequests")
+                        .HasForeignKey("ProxyServerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_proxy_server_test_requests_proxy_servers_proxy_server_id");
+
+                    b.Navigation("Server");
+                });
+
+            modelBuilder.Entity("ProxyServerAggregator.Domain.Entities.ProxyServer", b =>
+                {
+                    b.Navigation("TestRequests");
                 });
 #pragma warning restore 612, 618
         }
