@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DocumentationFile>ProxyServerTester.Infrastructure.xml</DocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Messaging.Outbox.Handling\Messaging.Outbox.Handling.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Messaging.Pulsar\Messaging.Pulsar.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Missions.Hosting\Missions.Hosting.csproj" />
+      <ProjectReference Include="..\ProxyServerTester.Application\ProxyServerTester.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    </ItemGroup>
+
+</Project>

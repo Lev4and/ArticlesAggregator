@@ -1,7 +1,7 @@
-using Grpc.Core;
+﻿using Grpc.Core;
 using Result;
 
-namespace ProxyServerAggregator.Presentation.Extensions;
+namespace Grpc.Extensions;
 
 public static class AppErrorExtensions
 {

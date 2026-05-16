@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+import "ProxyServerTypes.proto";
+
+option csharp_namespace = "Grpc.Protos";
+
+package ArticlesAggregator;
+
+service ProxyServerAggregator {
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+  
+  rpc GetProxyServer(GetProxyServerRequest) returns (ProxyServerRpc);
+}
+
+message GetProxyServerRequest {
+  string id = 1;
+}

@@ -3,7 +3,7 @@ using Messaging.Messages.ProxyServerEvents;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerAggregator.Application.Abstracts.ProxyServers;
-using ProxyServerAggregator.Application.Dtos.ProxyServers;
+using ProxyServerAggregator.Domain.Dtos.ProxyServers;
 using Result;
 
 namespace ProxyServerAggregator.Application.UseCases.ProxyServers.Messages;
@@ -33,6 +33,7 @@ public class ProxyServerFoundMessageHandler : IMessageHandler<ProxyServerFoundEv
         var proxyServerDto = new ProxyServerDto
         {
             Id                = message.ProxyServerId,
+            NormalizedName    = message.NormalizedName, 
             Protocol          = message.Protocol,
             HostnameOrAddress = message.HostnameOrAddress,
             Port              = message.Port,

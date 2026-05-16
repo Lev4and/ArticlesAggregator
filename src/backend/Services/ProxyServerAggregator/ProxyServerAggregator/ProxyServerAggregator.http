@@ -1,6 +1,3 @@
 @ProxyServerAggregator_HostAddress = http://localhost:5002
 
-GET {{ProxyServerAggregator_HostAddress}}/weatherforecast/
-Accept: application/json
-
 ###

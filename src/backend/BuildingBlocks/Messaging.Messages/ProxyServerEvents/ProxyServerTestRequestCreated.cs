@@ -11,7 +11,7 @@ public record ProxyServerTestRequestCreated : BaseMessage
     public Guid RequestId { get; init; }
     
     public Guid ProxyServerId { get; init; }
-
+    
     public string NormalizedName { get; init; } = null!;
     
     public ProxyServerProtocol Protocol { get; init; }

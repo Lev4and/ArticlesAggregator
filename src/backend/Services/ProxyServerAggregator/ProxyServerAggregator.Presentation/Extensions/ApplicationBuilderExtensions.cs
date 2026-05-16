@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using ProxyServerAggregator.Presentation.Endpoints;
+using ProxyServerAggregator.Presentation.Grpc.Services;
 
 namespace ProxyServerAggregator.Presentation.Extensions;
 
@@ -23,6 +24,8 @@ public static class ApplicationBuilderExtensions
 
     public static IApplicationBuilder MapGrpcServices(this WebApplication app)
     {
+        app.MapGrpcService<ProxyServerAggregatorGrpcService>();
+        
         return app;
     }
 }

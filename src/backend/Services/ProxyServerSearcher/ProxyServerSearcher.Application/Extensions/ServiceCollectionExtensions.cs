@@ -10,6 +10,14 @@ public static class ServiceCollectionExtensions
         var assembly = typeof(ServiceCollectionExtensions).Assembly;
         
         services.AddStoredTaskHandlers(assembly);
+        services.AddMediator(options =>
+        {
+            options.ServiceLifetime              = ServiceLifetime.Scoped;
+            options.Assemblies                   = [typeof(ServiceCollectionExtensions).Assembly];
+            options.Telemetry.ActivitySourceName = "Cqrs.Mediator";
+            options.Telemetry.EnableMetrics      = true;
+            options.Telemetry.EnableTracing      = true;
+        });
         
         return services;
     }

@@ -30,8 +30,8 @@ public class ProxyServerEntityConfiguration : IEntityTypeConfiguration<ProxyServ
         builder.HasQueryFilter(e => !e.IsDeleted);
         builder
             .HasMany(e => e.TestRequests)
-            .WithOne(e => e.Server)
-            .HasPrincipalKey(e => e.Id)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(e => e.Server)
+                    .HasPrincipalKey(e => e.Id)
+                        .OnDelete(DeleteBehavior.Cascade);
     }
 }

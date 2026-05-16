@@ -4,5 +4,376 @@
         <name>ProxyServerAggregator.Application</name>
     </assembly>
     <members>
+        <member name="T:Mediator.CachingMode">
+            <summary>
+            Specifies the caching mode for Mediator initialization.
+            Initialization consists of building fast lookups for resolving handlers
+            and pre-building the message pipelines.
+            </summary>
+        </member>
+        <member name="F:Mediator.CachingMode.Eager">
+            <summary>
+            Eagerly initialize on first Mediator access.
+            Best for long-running throughput-optimized scenarios where startup cost is amortized.
+            </summary>
+        </member>
+        <member name="F:Mediator.CachingMode.Lazy">
+            <summary>
+            Lazily initialize handler wrappers on demand as messages are processed.
+            Best for cold start scenarios (e.g., serverless, Native AOT) where minimal initialization is preferred.
+            </summary>
+        </member>
+        <member name="T:Mediator.MediatorTelemetryOptions">
+            <summary>
+            Provides telemetry options for Mediator.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorTelemetryOptions.EnableMetrics">
+            <summary>
+            Enable metrics for message processing using <see cref="T:System.Diagnostics.Metrics.Meter" />.
+            Requires .NET 8.0 or greater.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorTelemetryOptions.MeterName">
+            <summary>
+            The <see cref="T:System.Diagnostics.Metrics.Meter" /> name used for metrics.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorTelemetryOptions.EnableTracing">
+            <summary>
+            Enable tracing for message processing using <see cref="T:System.Diagnostics.ActivitySource" />.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorTelemetryOptions.ActivitySourceName">
+            <summary>
+            The <see cref="T:System.Diagnostics.ActivitySource" /> name used for tracing.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorTelemetryOptions.HistogramBuckets">
+            <summary>
+            Custom histogram bucket boundaries for the messaging.process.duration metric.
+            If null, uses default boundaries.
+            </summary>
+        </member>
+        <member name="T:Mediator.MediatorOptions">
+            <summary>
+            Provide options for the Mediator source generator.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.Namespace">
+            <summary>
+            The namespace in which the Mediator implementation is generated.
+            By default, the namespace is "Mediator".
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.GenerateTypesAsInternal">
+            <summary>
+            Wether or not generated types should be <c>internal</c> (they are public by default).
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.NotificationPublisherType">
+            <summary>
+            The <see cref="T:Mediator.INotificationPublisher" /> type to use when publishing notifications.
+            By default, the type is <see cref="T:Mediator.ForeachAwaitPublisher" />.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.ServiceLifetime">
+            <summary>
+            The default lifetime of the services registered in the DI container by the Mediator source generator.
+            By default, the lifetime is <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton" />.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.Assemblies">
+            <summary>
+            The collection of assemblies to scan for Mediator handlers.
+            By default, the collection is empty, in which case the source generator will scan all assemblies through references from the source generated project.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.Types">
+            <summary>
+            The collection of types to include for generation.
+            Supports concrete types, interfaces, and abstract base types.
+            A message is included when it is assignable to one or more configured types.
+            Applies to requests, commands, queries, stream variants, and notifications.
+            When empty or not configured, all discovered messages are included (no filtering).
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.PipelineBehaviors">
+            <summary>
+            The collection of types of pipeline behaviors to register in DI.
+            When the type is an unconstructed generic type, the source generator will register all the constructed types of the generic type (open generics that is supported during AoT).
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.StreamPipelineBehaviors">
+            <summary>
+            The collection of types of streaming pipeline behaviors to register in DI.
+            When the type is an unconstructed generic type, the source generator will register all the constructed types of the generic type (open generics that is supported during AoT).
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.CachingMode">
+            <summary>
+            The caching mode for Mediator initialization.
+            When set to <see cref="F:Mediator.CachingMode.Eager" /> (default), all initialization is done on first Mediator access.
+            When set to <see cref="F:Mediator.CachingMode.Lazy" />, initialization is done on demand as messages are processed.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptions.Telemetry">
+            <summary>
+            Telemetry options for Mediator.
+            </summary>
+        </member>
+        <member name="T:Mediator.MediatorOptionsAttribute">
+            <summary>
+            Provide options for the Mediator source generator.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.Namespace">
+            <summary>
+            The namespace in which the Mediator implementation is generated.
+            By default, the namespace is "Mediator".
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.NotificationPublisherType">
+            <summary>
+            The <see cref="T:Mediator.INotificationPublisher" /> type to use when publishing notifications.
+            By default, the type is <see cref="T:Mediator.ForeachAwaitPublisher" />.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.ServiceLifetime">
+            <summary>
+            The default lifetime of the services registered in the DI container by the Mediator source generator.
+            By default, the lifetime is <see cref="F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton" />.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.CachingMode">
+            <summary>
+            The caching mode for Mediator initialization.
+            When set to <see cref="F:Mediator.CachingMode.Eager" /> (default), all initialization is done on first Mediator access.
+            When set to <see cref="F:Mediator.CachingMode.Lazy" />, initialization is done on demand as messages are processed.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.TelemetryEnableMetrics">
+            <summary>
+            Enable metrics for message processing using <see cref="T:System.Diagnostics.Metrics.Meter" />.
+            Requires .NET 8.0 or greater.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.TelemetryMeterName">
+            <summary>
+            The <see cref="T:System.Diagnostics.Metrics.Meter" /> name used for metrics.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.TelemetryEnableTracing">
+            <summary>
+            Enable tracing for message processing using <see cref="T:System.Diagnostics.ActivitySource" />.
+            </summary>
+        </member>
+        <member name="P:Mediator.MediatorOptionsAttribute.TelemetryActivitySourceName">
+            <summary>
+            The <see cref="T:System.Diagnostics.ActivitySource" /> name used for tracing.
+            </summary>
+        </member>
+        <member name="T:Mediator.AssemblyReference">
+            <summary>
+            Represents an assembly reference.
+            This is used to specify the types or assemblies to scan for Mediator handlers.
+            </summary>
+        </member>
+        <member name="P:Mediator.AssemblyReference.Assembly">
+            <summary>
+            The assembly reference.
+            </summary>
+        </member>
+        <member name="M:Mediator.AssemblyReference.op_Implicit(System.Type)~Mediator.AssemblyReference">
+            <summary>
+            Creates a new instance of <see cref="T:Mediator.AssemblyReference" /> from the specified type.
+            </summary>
+            <param name="type">The type</param>
+            <returns>A new instance of <see cref="T:Mediator.AssemblyReference" /></returns>
+        </member>
+        <member name="M:Mediator.AssemblyReference.op_Implicit(System.Reflection.Assembly)~Mediator.AssemblyReference">
+            <summary>
+            Creates a new instance of <see cref="T:Mediator.AssemblyReference" /> from the specified assembly.
+            </summary>
+            <param name="assembly">The assembly</param>
+            <returns>A new instance of <see cref="T:Mediator.AssemblyReference" /></returns>
+        </member>
+        <member name="T:Mediator.Mediator">
+            <summary>
+            Generated code for Mediator implementation.
+            This type is also registered as a DI service.
+            Can be used directly for high performance scenarios.
+            </summary>
+        </member>
+        <member name="F:Mediator.Mediator.ServiceLifetime">
+            <summary>
+            The lifetime of Mediator-related service registrations in DI container.
+            </summary>
+        </member>
+        <member name="F:Mediator.Mediator.CachingMode">
+            <summary>
+            The caching mode configuration for Mediator handler resolution.
+            </summary>
+        </member>
+        <member name="F:Mediator.Mediator.NotificationPublisherName">
+            <summary>
+            The name of the notification publisher service that was configured.
+            </summary>
+        </member>
+        <member name="F:Mediator.Mediator.TotalMessages">
+            <summary>
+            The total number of Mediator messages that were discovered.
+            </summary>
+        </member>
+        <member name="F:Mediator.Mediator.MeterName">
+            <summary>
+            The configured telemetry meter name.
+            </summary>
+        </member>
+        <member name="F:Mediator.Mediator.ActivitySourceName">
+            <summary>
+            The configured telemetry activity source name.
+            </summary>
+        </member>
+        <member name="M:Mediator.Mediator.#ctor(System.IServiceProvider)">
+            <summary>
+            Constructor for DI, should not be used by consumer.
+            </summary>
+        </member>
+        <member name="M:Mediator.Mediator.Send(ProxyServerAggregator.Application.UseCases.ProxyServers.Queries.Get.GetProxyServerQuery,System.Threading.CancellationToken)">
+            <summary>
+            Send a query of type global::ProxyServerAggregator.Application.UseCases.ProxyServers.Queries.Get.GetProxyServerQuery.
+            Throws <see cref="T:System.ArgumentNullException"/> if query is null.
+            </summary>
+            <param name="query">Incoming query</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:Mediator.Mediator.Send``1(Mediator.IRequest{``0},System.Threading.CancellationToken)">
+            <summary>
+            Send request.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if request does not implement <see cref="T:Mediator.IRequest`1"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="request">Incoming request</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:Mediator.Mediator.CreateStream``1(Mediator.IStreamRequest{``0},System.Threading.CancellationToken)">
+            <summary>
+            Create stream for request.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if request does not implement <see cref="T:Mediator.IStreamRequest`1"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="request">Incoming message</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Async enumerable</returns>
+        </member>
+        <member name="M:Mediator.Mediator.Send``1(Mediator.ICommand{``0},System.Threading.CancellationToken)">
+            <summary>
+            Send command.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if command does not implement <see cref="T:Mediator.ICommand`1"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="command">Incoming command</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:Mediator.Mediator.CreateStream``1(Mediator.IStreamCommand{``0},System.Threading.CancellationToken)">
+            <summary>
+            Create stream for command.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if command does not implement <see cref="T:Mediator.IStreamCommand`1"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="command">Incoming message</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Async enumerable</returns>
+        </member>
+        <member name="M:Mediator.Mediator.Send``1(Mediator.IQuery{``0},System.Threading.CancellationToken)">
+            <summary>
+            Send query.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if query does not implement <see cref="T:Mediator.IQuery`1"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="query">Incoming query</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:Mediator.Mediator.CreateStream``1(Mediator.IStreamQuery{``0},System.Threading.CancellationToken)">
+            <summary>
+            Create stream for query.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if query does not implement <see cref="T:Mediator.IStreamQuery`1"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="query">Incoming message</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Async enumerable</returns>
+        </member>
+        <member name="M:Mediator.Mediator.Send(System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Send message.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if message does not implement <see cref="T:Mediator.IMessage"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="message">Incoming message</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:Mediator.Mediator.CreateStream(System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Create stream.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if message does not implement <see cref="T:Mediator.IStreamMessage"/>.
+            Throws <see cref="T:Mediator.MissingMessageHandlerException"/> if no handler is registered.
+            </summary>
+            <param name="message">Incoming message</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Async enumerable</returns>
+        </member>
+        <member name="M:Mediator.Mediator.Publish(System.Object,System.Threading.CancellationToken)">
+            <summary>
+            Publish notification.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if notification does not implement <see cref="T:Mediator.INotification"/>.
+            Throws <see cref="T:System.AggregateException"/> if handlers throw exception(s).
+            Drops messages
+            </summary>
+            <param name="notification">Incoming notification</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:Mediator.Mediator.Publish``1(``0,System.Threading.CancellationToken)">
+            <summary>
+            Publish notification.
+            Throws <see cref="T:System.ArgumentNullException"/> if message is null.
+            Throws <see cref="T:Mediator.InvalidMessageException"/> if notification does not implement <see cref="T:Mediator.INotification"/>.
+            Throws <see cref="T:System.AggregateException"/> if handlers throw exception(s).
+            </summary>
+            <param name="notification">Incoming notification</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.MediatorDependencyInjectionExtensions">
+            <summary>
+            DI extensions for Mediator.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.MediatorDependencyInjectionExtensions.AddMediator(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the Mediator implementation and handlers of your application.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.MediatorDependencyInjectionExtensions.AddMediator(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Mediator.MediatorOptions})">
+            <summary>
+            Adds the Mediator implementation and handlers of your application, with specified options.
+            </summary>
+        </member>
     </members>
 </doc>

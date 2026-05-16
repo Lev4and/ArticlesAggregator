@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Caching.Redis\Caching.Redis.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Messaging.Outbox.Handling\Messaging.Outbox.Handling.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Messaging.Pulsar\Messaging.Pulsar.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Missions.Hosting\Missions.Hosting.csproj" />

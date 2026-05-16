@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "Grpc.Protos";
+
+package ArticlesAggregator;
+
+message ProxyServerRpc {
+  string id = 1;
+  ProxyServerProtocolRpc protocol = 2;
+  string hostnameOrAddress = 3;
+  int32 port = 4;
+  optional ProxyServerCredentialsRpc credentials = 5;
+}
+
+message ProxyServerCredentialsRpc {
+  string username = 1;
+  string password = 2;
+}
+
+enum ProxyServerProtocolRpc {
+  PROXY_SERVER_PROTOCOL_UNSPECIFIED = 0;
+  PROXY_SERVER_PROTOCOL_HTTP = 1;
+  PROXY_SERVER_PROTOCOL_HTTPS = 2;
+  PROXY_SERVER_PROTOCOL_SOCKS4 = 3;
+  PROXY_SERVER_PROTOCOL_SOCKS5 = 4;
+}

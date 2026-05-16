@@ -1,12 +1,12 @@
 ﻿using Messaging.Messages.ProxyServerEvents.Models;
 
-namespace ProxyServerAggregator.Application.Dtos.ProxyServers;
+namespace ProxyServerTester.Domain.Dtos.ProxyServers;
 
 public record ProxyServerDto
 {
     public Guid Id { get; init; }
-    
-    public string NormalizedName => $"{Protocol.ToString().ToUpper()}-{HostnameOrAddress}-{Port}";
+
+    public string NormalizedName { get; init; } = null!;
     
     public ProxyServerProtocol Protocol { get; init; }
     

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DocumentationFile>ProxyServerTester.Persistence.xml</DocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Database.EntityFramework\Database.EntityFramework.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Messaging.Outbox.EntityFramework\Messaging.Outbox.EntityFramework.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\StoredTasks.Database.EntityFramework\StoredTasks.Database.EntityFramework.csproj" />
+      <ProjectReference Include="..\ProxyServerTester.Domain\ProxyServerTester.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
+</Project>

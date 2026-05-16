@@ -25,14 +25,13 @@ public static class ServiceCollectionExtensions
                 {
                     EndPoints   = [new DnsEndPoint(configuration.Host, configuration.Port)],
                     User        = configuration.Username,
-                    Password    = configuration.Password, 
-                    ServiceName = configuration.PrefixKey
+                    Password    = configuration.Password,
                 };
             });
 
             services.AddDistributedMemoryCache();
             
-            services.AddSingleton<IMemoryCache, RedisMemoryCache>();
+            services.AddScoped<IMemoryCache, RedisMemoryCache>();
             
             return services;
         }

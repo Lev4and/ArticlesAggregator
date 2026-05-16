@@ -8,7 +8,7 @@ public class ProxyServerTestRequest : EntityBase<Guid>, IHasEntityState, IHasTim
 {
     public Guid ProxyServerId { get; set; }
 
-    public ProxyServerTestRequestStatus Status { get; init; } = ProxyServerTestRequestStatus.Created;
+    public ProxyServerTestRequestStatus Status { get; set; } = ProxyServerTestRequestStatus.Created;
     
     public long? RequestTime { get; set; }
     

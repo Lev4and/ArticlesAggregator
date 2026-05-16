@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ProxyServerTester.Persistence</name>
+    </assembly>
+    <members>
+        <member name="T:ProxyServerTester.Persistence.Migrations.Initial">
+            <inheritdoc />
+        </member>
+        <member name="M:ProxyServerTester.Persistence.Migrations.Initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ProxyServerTester.Persistence.Migrations.Initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:ProxyServerTester.Persistence.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

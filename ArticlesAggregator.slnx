@@ -22,6 +22,8 @@
     <Project Path="src/backend/BuildingBlocks/DomainEvents.Database.Abstracts/DomainEvents.Database.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/DomainEvents.Database.EntityFramework/DomainEvents.Database.EntityFramework.csproj" />
     <Project Path="src/backend/BuildingBlocks/Extensions/Extensions.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Grpc.Protos/Grpc.Protos.csproj" />
+    <Project Path="src/backend/BuildingBlocks/Grpc/Grpc.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Abstracts/Messaging.Abstracts.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Channel/Messaging.Channel.csproj" />
     <Project Path="src/backend/BuildingBlocks/Messaging.Hosting/Messaging.Hosting.csproj" />
@@ -63,6 +65,14 @@
     <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Persistence/ProxyServerSearcher.Persistence.csproj" />
     <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher.Presentation/ProxyServerSearcher.Presentation.csproj" />
     <Project Path="src/backend/Services/ProxyServerSearcher/ProxyServerSearcher/ProxyServerSearcher.csproj" />
+  </Folder>
+  <Folder Name="/src/backend/Services/ProxyServerTester/">
+    <Project Path="src/backend/Services/ProxyServerTester/ProxyServerTester.Application/ProxyServerTester.Application.csproj" />
+    <Project Path="src/backend/Services/ProxyServerTester/ProxyServerTester.Domain/ProxyServerTester.Domain.csproj" />
+    <Project Path="src/backend/Services/ProxyServerTester/ProxyServerTester.Infrastructure/ProxyServerTester.Infrastructure.csproj" />
+    <Project Path="src/backend/Services/ProxyServerTester/ProxyServerTester.Persistence/ProxyServerTester.Persistence.csproj" />
+    <Project Path="src/backend/Services/ProxyServerTester/ProxyServerTester.Presentation/ProxyServerTester.Presentation.csproj" />
+    <Project Path="src/backend/Services/ProxyServerTester/ProxyServerTester/ProxyServerTester.csproj" />
   </Folder>
   <Folder Name="/src/frontend/" />
   <Folder Name="/tests/" />

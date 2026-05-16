@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Grpc.Protos\Grpc.Protos.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Server.Kestrel\Server.Kestrel.csproj" />
       <ProjectReference Include="..\ProxyServerAggregator.Application\ProxyServerAggregator.Application.csproj" />
       <ProjectReference Include="..\ProxyServerAggregator.Persistence\ProxyServerAggregator.Persistence.csproj" />
@@ -21,7 +22,10 @@
 
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
-        <PackageReference Include="Grpc.AspNetCore" />
+        <PackageReference Include="Grpc.Tools">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Scalar.AspNetCore" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
@@ -30,7 +34,20 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Grpc\Services\" />
+      <Folder Include="Grpc\Protos\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="..\..\..\BuildingBlocks\Grpc.Protos\ProxyServerAggregator.proto">
+            <GrpcServices>Server</GrpcServices>
+            <ProtoCompile>True</ProtoCompile>
+            <Link>Grpc\Protos\ProxyServerAggregator.proto</Link>
+        </Protobuf>
+        <Protobuf Include="..\..\..\BuildingBlocks\Grpc.Protos\ProxyServerTypes.proto">
+            <GrpcServices>None</GrpcServices>
+            <ProtoCompile>True</ProtoCompile>
+            <Link>Grpc\Protos\ProxyServerTypes.proto</Link>
+        </Protobuf>
     </ItemGroup>
 
 </Project>

@@ -70,6 +70,7 @@ public static class WebApplicationBuilderExtensions
                     tracerProviderBuilder.AddGrpcClientInstrumentation();
                     
                     tracerProviderBuilder.AddSource("DotPulsar");
+                    tracerProviderBuilder.AddSource("Cqrs.Mediator");
 
                     tracerProviderBuilder.AddOtlpExporter(options =>
                     {
@@ -89,6 +90,7 @@ public static class WebApplicationBuilderExtensions
                     meterProviderBuilder.AddSqlClientInstrumentation();
                     
                     meterProviderBuilder.AddMeter("DotPulsar");
+                    meterProviderBuilder.AddMeter("Cqrs.Mediator");
                     
                     meterProviderBuilder.AddOtlpExporter(options =>
                     {

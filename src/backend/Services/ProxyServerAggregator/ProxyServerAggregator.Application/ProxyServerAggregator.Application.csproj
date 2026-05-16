@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\BuildingBlocks\Cqrs.Mediator\Cqrs.Mediator.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Caching.Abstracts\Caching.Abstracts.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Missions.Abstracts\Missions.Abstracts.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\Observability.Abstracts\Observability.Abstracts.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\StoredTasks.Database.Missions\StoredTasks.Database.Missions.csproj" />
@@ -18,6 +18,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Mediator.Abstractions" />
+        <PackageReference Include="Mediator.SourceGenerator">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     </ItemGroup>
 

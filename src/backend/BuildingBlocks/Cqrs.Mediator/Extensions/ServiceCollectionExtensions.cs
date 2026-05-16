@@ -9,9 +9,11 @@ public static class ServiceCollectionExtensions
     {
         services.AddMediator(options =>
         {
-            options.ServiceLifetime         = ServiceLifetime.Scoped;
-            options.GenerateTypesAsInternal = true;
-            options.Assemblies              = [..assemblies];
+            options.ServiceLifetime              = ServiceLifetime.Scoped;
+            options.Assemblies                   = [..assemblies];
+            options.Telemetry.ActivitySourceName = "Cqrs.Mediator";
+            options.Telemetry.EnableMetrics      = true;
+            options.Telemetry.EnableTracing      = true;
         });
         
         return services;

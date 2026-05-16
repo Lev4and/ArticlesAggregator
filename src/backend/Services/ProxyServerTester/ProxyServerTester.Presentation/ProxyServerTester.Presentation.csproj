@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DocumentationFile>ProxyServerTester.Presentation.xml</DocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\BuildingBlocks\Grpc.Protos\Grpc.Protos.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\Server.Kestrel\Server.Kestrel.csproj" />
+      <ProjectReference Include="..\ProxyServerTester.Application\ProxyServerTester.Application.csproj" />
+      <ProjectReference Include="..\ProxyServerTester.Persistence\ProxyServerTester.Persistence.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+        <PackageReference Include="Grpc.Tools">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Scalar.AspNetCore" />
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
+        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="..\..\..\BuildingBlocks\Grpc.Protos\ProxyServerTester.proto">
+            <GrpcServices>Server</GrpcServices>
+            <ProtoCompile>True</ProtoCompile>
+            <Link>Grpc\Protos\ProxyServerTester.proto</Link>
+        </Protobuf>
+        <Protobuf Include="..\..\..\BuildingBlocks\Grpc.Protos\ProxyServerTypes.proto">
+            <GrpcServices>None</GrpcServices>
+            <ProtoCompile>True</ProtoCompile>
+            <Link>Grpc\Protos\ProxyServerTypes.proto</Link>
+        </Protobuf>
+    </ItemGroup>
+
+</Project>

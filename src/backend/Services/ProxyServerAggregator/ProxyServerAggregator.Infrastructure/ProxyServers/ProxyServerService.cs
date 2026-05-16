@@ -6,7 +6,7 @@ using Messaging.Outbox.Abstracts.Extensions;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerAggregator.Application.Abstracts.ProxyServers;
-using ProxyServerAggregator.Application.Dtos.ProxyServers;
+using ProxyServerAggregator.Domain.Dtos.ProxyServers;
 using ProxyServerAggregator.Domain.Entities;
 using ProxyServerAggregator.Domain.Repositories;
 using Result;
@@ -20,19 +20,22 @@ public class ProxyServerService : IProxyServerService
     private readonly IOutboxMessageRepository    _outboxMessageRepository;
     private readonly IProxyServerRepository      _repository;
     private readonly IUnitOfWork                 _unitOfWork;
+    private readonly IProxyServerCacheService    _cacheService;
     
     public ProxyServerService(
         ITracer<ProxyServerService> tracer, 
         ILogger<ProxyServerService> logger, 
         IOutboxMessageRepository    outboxMessageRepository,
         IProxyServerRepository      repository, 
-        IUnitOfWork                 unitOfWork)
+        IUnitOfWork                 unitOfWork, 
+        IProxyServerCacheService    cacheService)
     {
         _tracer                  = tracer;
         _logger                  = logger;
         _outboxMessageRepository = outboxMessageRepository;
         _repository              = repository;
         _unitOfWork              = unitOfWork;
+        _cacheService            = cacheService;
     }
     
     public async Task<AppResult> CreateAsync(ProxyServerDto model, CancellationToken ct = default)
@@ -87,7 +90,13 @@ public class ProxyServerService : IProxyServerService
                 Protocol          = proxyServer.Protocol,
                 HostnameOrAddress = proxyServer.HostnameOrAddress,
                 Port              = proxyServer.Port,
-                Credentials       = proxyServer.Credentials
+                Credentials       = proxyServer.Credentials is not null
+                    ? new ProxyServerCredentials
+                    {
+                        Username = proxyServer.Credentials.Username,
+                        Password = proxyServer.Credentials.Password
+                    }
+                    : null,
             };
 
             var outboxMessage = message.ToOutboxMessage();
@@ -99,6 +108,8 @@ public class ProxyServerService : IProxyServerService
             await transaction.CommitAsync(ct);
             
             outboxMessage.Dispose();
+
+            await _cacheService.SetAsync(model, ct);
             
             return AppResult.Success();
         }
@@ -110,6 +121,29 @@ public class ProxyServerService : IProxyServerService
             
             return AppResult.Failure(AppErrorType.Failed, "Failed to create proxy server");
         }
+    }
+
+    public async Task<AppResult<ProxyServerDto>> GetAsync(Guid id, CancellationToken ct = default)
+    {
+        using var operation = _tracer.StartOperation("Get proxy server");
+        
+        _logger.LogInformation("Get proxy server Id: {ProxyServerId}", id);
+        
+        var proxyServer = await _cacheService.GetAsync(id, ct);
+        if (proxyServer is not null) return AppResult<ProxyServerDto>.Success(proxyServer);
+        
+        proxyServer = await _repository.GetAsync(id, ct);
+        
+        if (proxyServer is not null)
+        {
+            await _cacheService.SetAsync(proxyServer, ct);
+            
+            return AppResult<ProxyServerDto>.Success(proxyServer);
+        }
+        
+        _logger.LogWarning("Proxy server not found Id: {ProxyServerId}", id);
+            
+        return AppResult<ProxyServerDto>.Failure(AppErrorType.NotFound, "Proxy server not found");
     }
 
     public async ValueTask DisposeAsync()
