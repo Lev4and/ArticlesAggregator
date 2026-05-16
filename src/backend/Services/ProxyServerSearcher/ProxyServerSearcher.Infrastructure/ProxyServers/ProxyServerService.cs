@@ -1,6 +1,7 @@
 ﻿using Database.Abstracts;
 using Extensions;
 using Messaging.Messages.ProxyServerEvents;
+using Messaging.Messages.ProxyServerEvents.Models;
 using Messaging.Outbox.Abstracts;
 using Messaging.Outbox.Abstracts.Extensions;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,6 @@ using ProxyServerSearcher.Application.Abstracts.ProxyServers;
 using ProxyServerSearcher.Application.Dtos.ProxyServers;
 using ProxyServerSearcher.Domain.Entities;
 using ProxyServerSearcher.Domain.Repositories;
-using ProxyServerSearcher.Domain.ValueObjects;
 using Result;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers;
@@ -80,9 +80,14 @@ public class ProxyServerService : IProxyServerService
             var outboxMessages = newProxyServers
                 .Select(proxyServer => new ProxyServerFoundEvent
                 {
-                    ProxyServerId = proxyServer.Id,
+                    ProxyServerId     = proxyServer.Id,
+                    NormalizedName    = proxyServer.NormalizedName,
+                    Protocol          = proxyServer.Protocol,
+                    HostnameOrAddress = proxyServer.HostnameOrAddress,
+                    Port              = proxyServer.Port,
+                    Credentials       = proxyServer.Credentials
                 })
-                .Select(@event => @event.ToOutboxMessage())
+                .Select(message => message.ToOutboxMessage())
                 .ToArray();
             
             _outboxMessageRepository.AddRange(outboxMessages);

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Messaging.Abstracts;
+using Messaging.Messages;
 
 namespace Messaging.Outbox.Abstracts.Extensions;
 
@@ -10,7 +11,7 @@ public static class MessageExtensions
     {
         return new OutboxMessage
         {
-            Type    = typeof(TMessage).FullName!,
+            Type    = MessageTypeResolver.Resolve(message) ?? throw new NotSupportedException(),
             Content = JsonSerializer.SerializeToDocument(message),
         };
     }

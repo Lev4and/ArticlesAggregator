@@ -60,11 +60,9 @@ public class PulsarProducer : IDistributedMessageProducer
             return;
         }
 
-        var producer = _producerDictionary.GetOrAdd(messageTopicAttribute.Topic,
-            topic => 
-                _client.NewProducer(Schema.String)
-                    .Topic(_topicConfiguration.Map(topic))
-                    .Create());
+        await using var producer = _client.NewProducer(Schema.String)
+            .Topic(_topicConfiguration.Map(messageTopicAttribute.Topic))
+            .Create();
 
         var messageBody = JsonConvert.SerializeObject(message);
         var messageBuilder   = producer.NewMessage()

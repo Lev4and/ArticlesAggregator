@@ -71,6 +71,8 @@ public abstract class StoredTaskMission<TStoredTask> : IMission
             
             foreach (var capturedTask in capturedTasks)
             {
+                using var storedTaskHandleOperation = Tracer.StartOperation("Stored task handle");
+                
                 Logger.LogInformation("Stored task handle Id: {StoredTaskId}", capturedTask.Id);
                 
                 var storedTaskHandler = (IStoredTaskHandler?)scope.ServiceProvider.GetService(typeof(IStoredTaskHandler<TStoredTask>));

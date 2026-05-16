@@ -2,11 +2,11 @@
 using System.Text.RegularExpressions;
 using AngleSharp.Html.Parser;
 using AngleSharp.XPath;
+using Messaging.Messages.ProxyServerEvents.Models;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using ProxyServerSearcher.Application.Abstracts.ProxyServers;
 using ProxyServerSearcher.Application.Dtos.ProxyServers;
-using ProxyServerSearcher.Domain.Enums;
 using ProxyServerSearcher.Infrastructure.ProxyServers.Constants;
 
 namespace ProxyServerSearcher.Infrastructure.ProxyServers.Sources.ProxyMania;

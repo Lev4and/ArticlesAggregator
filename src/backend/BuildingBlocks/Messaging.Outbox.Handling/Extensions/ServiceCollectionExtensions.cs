@@ -1,5 +1,4 @@
 ﻿using Messaging.Outbox.Abstracts;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Missions.Hosting.Extensions;

@@ -184,131 +184,131 @@ services:
         failure_action: rollback
         delay: 10s
 
-#  minio:
-#    image: bitnamilegacy/minio:2025.4.8
-#    container_name: minio
-#    restart: always
-#    command: server --address "0.0.0.0:9000" --console-address "0.0.0.0:9001" /data
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-#      interval: 5s
-#      timeout: 30s
-#      retries: 5
-#    logging: *default-logging
-#    environment:
-#      MINIO_ROOT_USER: minioadmin
-#      MINIO_ROOT_PASSWORD: minioadmin
-#      MINIO_PROMETHEUS_AUTH_TYPE: "public"
-#    volumes:
-#      - ./data/minio/data:/data
-#    ports:
-#      - "9000:9000"
-#      - "9001:9001"
-#    networks:
-#      - minio-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#      update_config:
-#        parallelism: 1
-#        order: start-first
-#        failure_action: rollback
-#        delay: 10s
+  minio:
+    image: bitnamilegacy/minio:2025.4.8
+    container_name: minio
+    restart: always
+    command: server --address "0.0.0.0:9000" --console-address "0.0.0.0:9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+    volumes:
+      - ./data/minio/data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - minio-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
 
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:26.3.2
-#    container_name: keycloak
-#    command:
-#      - start-dev
-#    restart: always
-##    healthcheck:
-##      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/live" ]
-##      interval: 5s
-##      timeout: 30s
-##      retries: 5
-#    logging: *default-logging
-#    depends_on:
-#      - keycloak-postgres
-#    environment:
-#      KC_DB: postgres
-#      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
-#      KC_DB_SCHEMA: public
-#      KC_DB_USERNAME: postgres
-#      KC_DB_PASSWORD: postgres
-#      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-#      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-#    ports:
-#      - "8090:8080"
-#    expose:
-#      - "9000"
-#    networks:
-#      - keycloak-network
-#      - keycloak-postgres-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#      update_config:
-#        parallelism: 1
-#        order: start-first
-#        failure_action: rollback
-#        delay: 10s
-#
-#  keycloak-postgres:
-#    image: postgres:18.3
-#    container_name: keycloak-postgres
-#    restart: always
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    container_name: keycloak
+    command:
+      - start-dev
+    restart: always
 #    healthcheck:
-#      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+#      test: [ "CMD", "curl", "-f", "http://localhost:9000/health/live" ]
 #      interval: 5s
 #      timeout: 30s
 #      retries: 5
-#    logging: *default-logging
-#    environment:
-#      POSTGRES_DB: keycloak
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: postgres
-#    volumes:
-#      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/docker
-#    ports:
-#      - "20001:5432"
-#    networks:
-#      - keycloak-postgres-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#      update_config:
-#        parallelism: 1
-#        order: start-first
-#        failure_action: rollback
-#        delay: 10s
-#  
-#  keycloak-postgres-exporter:
-#    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
-#    container_name: keycloak-postgres-exporter
-#    restart: always
-#    healthcheck:
-#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
-#      interval: 5s
-#      timeout: 30s
-#      retries: 5
-#    logging: *default-logging
-#    depends_on:
-#      - keycloak-postgres
-#    environment:
-#      DATA_SOURCE_NAME: "postgresql://postgres:postgres@keycloak-postgres:5432/keycloak?sslmode=disable"
-#    expose:
-#      - "9187"
-#    networks:
-#      - keycloak-postgres-exporter-network
-#      - keycloak-postgres-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#      update_config:
-#        parallelism: 1
-#        order: start-first
-#        failure_action: rollback
-#        delay: 10s
+    logging: *default-logging
+    depends_on:
+      - keycloak-postgres
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8090:8080"
+    expose:
+      - "9000"
+    networks:
+      - keycloak-network
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  keycloak-postgres:
+    image: postgres:18.3
+    container_name: keycloak-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/keycloak-postgres/data:/var/lib/postgresql/18/docker
+    ports:
+      - "20001:5432"
+    networks:
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+
+  keycloak-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
+    container_name: keycloak-postgres-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - keycloak-postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@keycloak-postgres:5432/keycloak?sslmode=disable"
+    expose:
+      - "9187"
+    networks:
+      - keycloak-postgres-exporter-network
+      - keycloak-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
         
 #  proxy-server-searcher:
 #    image: ${DOCKER_REGISTRY-}proxy-server-searcher
@@ -402,6 +402,120 @@ services:
     networks:
       - proxy-server-searcher-postgres-exporter-network
       - proxy-server-searcher-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  proxy-server-aggregator-postgres:
+    image: postgres:18.3
+    container_name: proxy-server-aggregator-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: proxy-server-aggregator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/proxy-server-aggregator-postgres/data:/var/lib/postgresql/18/docker
+    ports:
+      - "20003:5432"
+    networks:
+      - proxy-server-aggregator-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  proxy-server-aggregator-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
+    container_name: proxy-server-aggregator-postgres-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - proxy-server-aggregator-postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@proxy-server-aggregator-postgres:5432/proxy-server-aggregator?sslmode=disable"
+    expose:
+      - "9187"
+    networks:
+      - proxy-server-aggregator-postgres-exporter-network
+      - proxy-server-aggregator-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  proxy-server-tester-postgres:
+    image: postgres:18.3
+    container_name: proxy-server-tester-postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      POSTGRES_DB: proxy-server-tester
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data/proxy-server-tester-postgres/data:/var/lib/postgresql/18/docker
+    ports:
+      - "20004:5432"
+    networks:
+      - proxy-server-tester-postgres-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+  
+  proxy-server-tester-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter@sha256:e96064f876226d94bb6ce48a4c4b3dd76edba91168ec1ab024e5c4b959310b0f
+    container_name: proxy-server-tester-postgres-exporter
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    depends_on:
+      - proxy-server-tester-postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@proxy-server-tester-postgres:5432/proxy-server-tester?sslmode=disable"
+    expose:
+      - "9187"
+    networks:
+      - proxy-server-tester-postgres-exporter-network
+      - proxy-server-tester-postgres-network
     deploy:
       mode: replicated
       replicas: 1
@@ -540,39 +654,39 @@ services:
         failure_action: rollback
         delay: 10s
   
-#  jaeger:
-#    image: jaegertracing/all-in-one:1.71.0
-#    container_name: jaeger
-#    restart: always
-#    healthcheck:
-#      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:14269" ]
-#      interval: 5s
-#      timeout: 30s
-#      retries: 5
-#    logging: *default-logging
-#    environment:
-#      SPAN_STORAGE_TYPE: badger
-#      BADGER_EPHEMERAL: "false"
-#      BADGER_DIRECTORY_VALUE: /badger/data
-#      BADGER_DIRECTORY_KEY: /badger/key
-#    volumes:
-#      - ./data/jaeger:/badger
-#    ports:
-#      - "16686:16686"
-#    expose:
-#      - "4317"
-#      - "4318"
-#      - "14269"
-#    networks:
-#      - jaeger-network
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#      update_config:
-#        parallelism: 1
-#        order: start-first
-#        failure_action: rollback
-#        delay: 10s
+  jaeger:
+    image: jaegertracing/all-in-one:1.71.0
+    container_name: jaeger
+    restart: always
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:14269" ]
+      interval: 5s
+      timeout: 30s
+      retries: 5
+    logging: *default-logging
+    environment:
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    volumes:
+      - ./data/jaeger:/badger
+    ports:
+      - "16686:16686"
+    expose:
+      - "4317"
+      - "4318"
+      - "14269"
+    networks:
+      - jaeger-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
   
   node-exporter:
     image: prom/node-exporter:v1.9.1
@@ -742,6 +856,14 @@ networks:
   proxy-server-searcher-postgres-network:
     driver: overlay
   proxy-server-searcher-postgres-exporter-network:
+    driver: overlay
+  proxy-server-aggregator-postgres-network:
+    driver: overlay
+  proxy-server-aggregator-postgres-exporter-network:
+    driver: overlay
+  proxy-server-tester-postgres-network:
+    driver: overlay
+  proxy-server-tester-postgres-exporter-network:
     driver: overlay
   selenium-hub-network:
     driver: overlay

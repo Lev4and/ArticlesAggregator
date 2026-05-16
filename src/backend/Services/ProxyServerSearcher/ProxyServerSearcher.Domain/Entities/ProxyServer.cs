@@ -1,7 +1,6 @@
 ﻿using Contracts;
+using Messaging.Messages.ProxyServerEvents.Models;
 using Primitives;
-using ProxyServerSearcher.Domain.Enums;
-using ProxyServerSearcher.Domain.ValueObjects;
 
 namespace ProxyServerSearcher.Domain.Entities;
 

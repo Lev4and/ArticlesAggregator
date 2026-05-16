@@ -1,5 +1,5 @@
-﻿using ProxyServerSearcher.Domain.Enums;
-using ProxyServerSearcher.Domain.ValueObjects;
+﻿
+using Messaging.Messages.ProxyServerEvents.Models;
 
 namespace ProxyServerSearcher.Application.Dtos.ProxyServers;
 

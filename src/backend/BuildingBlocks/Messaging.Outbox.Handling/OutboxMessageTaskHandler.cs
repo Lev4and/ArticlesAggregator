@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Messaging.Abstracts;
 using Messaging.Messages;
 using Messaging.Outbox.Abstracts;
@@ -32,7 +31,7 @@ public class OutboxMessageTaskHandler : IStoredTaskHandler<OutboxMessage>
         
         _logger.LogInformation("Outbox message task handle");
 
-        var messageType = typeof(BaseMessage).Assembly.GetType(storedTask.Type);
+        var messageType = MessageTypeResolver.Resolve(storedTask.Type);
         if (messageType is null)
         {
             _logger.LogError("Message type not found in assembly Type: {MessageType}", storedTask.Type);
@@ -49,10 +48,14 @@ public class OutboxMessageTaskHandler : IStoredTaskHandler<OutboxMessage>
         catch (Exception exception)
         {
             _logger.LogError(exception, "Deserialize message failed Type: {MessageType}", storedTask.Type);
-            
+
             return AppResult.Success();
         }
-
+        finally
+        {
+            storedTask.Content.Dispose();
+        }
+        
         await _messageProducer.PublishAsync(message, ct);
         
         return AppResult.Success();

@@ -3,7 +3,6 @@ using Database.EntityFramework.Repositories;
 using Messaging.Abstracts;
 using Messaging.Outbox.Abstracts;
 using Messaging.Outbox.Abstracts.Extensions;
-using Messaging.Outbox.EntityFramework.Extensions;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using StoredTasks.Database.EntityFramework.Repositories;
@@ -23,7 +22,7 @@ public class OutboxMessageRepository<TDbContext> : StoredTaskRepository<TDbConte
         
     }
 
-    public virtual void Add<TMessage>(TMessage message) 
+    public virtual void AddMessage<TMessage>(TMessage message) 
         where TMessage : IMessage
     {
         using var operation = Tracer.StartOperation("Add outbox message to change tracker");
@@ -33,7 +32,7 @@ public class OutboxMessageRepository<TDbContext> : StoredTaskRepository<TDbConte
         base.Add(message.ToOutboxMessage());
     }
 
-    public virtual async Task AddAsync<TMessage>(TMessage message, CancellationToken ct = default) 
+    public virtual async Task AddMessageAsync<TMessage>(TMessage message, CancellationToken ct = default) 
         where TMessage : IMessage
     {
         using var operation = Tracer.StartOperation("Add outbox message to db");
@@ -43,7 +42,7 @@ public class OutboxMessageRepository<TDbContext> : StoredTaskRepository<TDbConte
         await base.AddAsync(message.ToOutboxMessage(), ct);
     }
 
-    public virtual void AddRange<TMessage>(IEnumerable<TMessage> messages) 
+    public virtual void AddRangeMassage<TMessage>(IEnumerable<TMessage> messages) 
         where TMessage : IMessage
     {
         using var operation = Tracer.StartOperation("Add outbox messages to change tracker");
@@ -53,7 +52,8 @@ public class OutboxMessageRepository<TDbContext> : StoredTaskRepository<TDbConte
         base.AddRange(messages.Select(message => message.ToOutboxMessage()));
     }
 
-    public virtual async Task AddRangeAsync<TMessage>(IEnumerable<TMessage> messages, CancellationToken ct = default) 
+    public virtual async Task AddRangeMassageAsync<TMessage>(IEnumerable<TMessage> messages, 
+        CancellationToken ct = default) 
         where TMessage : IMessage
     {
         using var operation = Tracer.StartOperation("Add outbox messages to db");

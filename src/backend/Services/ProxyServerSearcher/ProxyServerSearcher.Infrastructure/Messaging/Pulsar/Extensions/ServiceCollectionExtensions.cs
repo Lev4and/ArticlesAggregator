@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddPulsarTopicConfiguration();
         services.AddPulsarMessaging(typeof(ServiceCollectionExtensions).Assembly);
         
-        // services.AddMessagingOutboxHandling();
+        services.AddMessagingOutboxHandling();
         
         return services;
     }

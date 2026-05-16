@@ -3,7 +3,6 @@ using Database.EntityFramework.Repositories;
 using Messaging.Abstracts;
 using Messaging.Inbox.Abstracts;
 using Messaging.Inbox.Abstracts.Extensions;
-using Messaging.Inbox.EntityFramework.Extensions;
 using Microsoft.Extensions.Logging;
 using Observability.Abstracts;
 using StoredTasks.Database.EntityFramework.Repositories;

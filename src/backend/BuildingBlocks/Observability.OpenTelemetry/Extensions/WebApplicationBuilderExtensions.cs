@@ -55,7 +55,7 @@ public static class WebApplicationBuilderExtensions
                 .WithTracing(tracerProviderBuilder =>
                 {
                     tracerProviderBuilder.AddSource(serviceName);
-                    
+
                     tracerProviderBuilder.AddAspNetCoreInstrumentation();
                     tracerProviderBuilder.AddEntityFrameworkCoreInstrumentation(options =>
                     {
@@ -69,6 +69,8 @@ public static class WebApplicationBuilderExtensions
                     tracerProviderBuilder.AddHttpClientInstrumentation();
                     tracerProviderBuilder.AddGrpcClientInstrumentation();
                     
+                    tracerProviderBuilder.AddSource("DotPulsar");
+
                     tracerProviderBuilder.AddOtlpExporter(options =>
                     {
                         options.Protocol = OtlpExportProtocol.Grpc;
@@ -85,6 +87,8 @@ public static class WebApplicationBuilderExtensions
                     meterProviderBuilder.AddProcessInstrumentation();
                     meterProviderBuilder.AddHttpClientInstrumentation();
                     meterProviderBuilder.AddSqlClientInstrumentation();
+                    
+                    meterProviderBuilder.AddMeter("DotPulsar");
                     
                     meterProviderBuilder.AddOtlpExporter(options =>
                     {

@@ -10,4 +10,8 @@
       <ProjectReference Include="..\Messaging.Abstracts\Messaging.Abstracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" />
+    </ItemGroup>
+
 </Project>

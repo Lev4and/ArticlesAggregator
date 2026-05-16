@@ -3,6 +3,7 @@ using DotPulsar;
 using DotPulsar.Abstractions;
 using DotPulsar.Extensions;
 using Messaging.Abstracts;
+using Messaging.Messages;
 using Messaging.Pulsar.Constants;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -50,7 +51,7 @@ public class PulsarConsumer : IMessageConsumer
                 continue;
             }
 
-            var messageType = Type.GetType(type);
+            var messageType = MessageTypeResolver.Resolve(type);
             if (messageType is null)
             {
                 await _consumer.Acknowledge(consumedMessage.MessageId, ct);
